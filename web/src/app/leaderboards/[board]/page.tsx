@@ -5,6 +5,8 @@ import { Breadcrumb, PageHead, formatMoney, formatNum } from "@/components/ui";
 import { BOARDS, PLAYERS, boardValue, type BoardKey } from "@/lib/data";
 import { playerHead } from "@/lib/items";
 
+export const instant = false;
+
 export function generateStaticParams() {
   return BOARDS.map((b) => ({ board: b.key }));
 }

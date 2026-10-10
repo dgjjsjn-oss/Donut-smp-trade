@@ -7,6 +7,8 @@ import { BlockGround, OreVeins, SkyGlow, VoxelStack } from "@/components/world";
 import { MARKET, PLAYERS, SERVER, REGIONS } from "@/lib/data";
 import { playerHead } from "@/lib/items";
 
+export const instant = false;
+
 export const metadata = {
   title: "DonutSMP Trader - Live Auction Prices",
   description:

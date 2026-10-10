@@ -4,6 +4,8 @@ import { PageHead, ItemCell, formatMoney } from "@/components/ui";
 import { MARKET } from "@/lib/data";
 import { ITEMS, CATEGORY_LABEL, type Category } from "@/lib/items";
 
+export const instant = false;
+
 export const metadata = {
   title: "All DonutSMP Items A-Z — Full Catalogue",
   description: "Every item the DonutSMP collector tracks, organised A-Z and by category.",

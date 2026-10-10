@@ -2,6 +2,8 @@ import { TopNav, Ticker, Footer } from "@/components/layout";
 import { PageHead, Panel, Stat, formatNum } from "@/components/ui";
 import { SERVER, REGIONS, MARKET } from "@/lib/data";
 
+export const instant = false;
+
 export const metadata = {
   title: "DonutSMP Server Status — Is DonutSMP Online?",
   description: "Live DonutSMP server status: player count, ping, version, uptime and regional population.",

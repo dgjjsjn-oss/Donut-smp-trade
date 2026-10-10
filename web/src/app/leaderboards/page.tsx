@@ -4,6 +4,8 @@ import { PageHead, Panel, formatNum } from "@/components/ui";
 import { BOARDS, PLAYERS, SERVER } from "@/lib/data";
 import { playerHead } from "@/lib/items";
 
+export const instant = false;
+
 export const metadata = {
   title: "DonutSMP Leaderboards — Money, Kills, Playtime & More",
   description:

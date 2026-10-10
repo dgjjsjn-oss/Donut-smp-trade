@@ -5,6 +5,8 @@ import { Breadcrumb, PageHead, Panel, Stat, formatMoney, formatNum } from "@/com
 import { PLAYERS, MARKET, REGIONS } from "@/lib/data";
 import { playerHead, playerRender, itemImage } from "@/lib/items";
 
+export const instant = false;
+
 export function generateStaticParams() {
   return PLAYERS.map((p) => ({ name: p.name }));
 }

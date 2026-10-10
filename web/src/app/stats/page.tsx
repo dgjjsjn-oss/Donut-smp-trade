@@ -2,6 +2,8 @@ import { TopNav, Ticker, Footer } from "@/components/layout";
 import { PageHead, Panel, Stat, formatMoney } from "@/components/ui";
 import { ECONOMY, MARKET, SERVER } from "@/lib/data";
 
+export const instant = false;
+
 export const metadata = {
   title: "DonutSMP Server Statistics — Economy, Players & Activity",
   description: "Full DonutSMP economy breakdown: total money held, shards, kills, deaths, blocks placed and broken, mob kills, shop purchases and sell earnings.",

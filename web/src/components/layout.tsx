@@ -10,33 +10,45 @@ const SEARCH_PRICES: Record<string, number> = Object.fromEntries(
   MARKET.map((m) => [m.slug, m.price])
 );
 
-const NAV = [
-  { href: "/prices", label: "Prices" },
-  { href: "/auction", label: "Auction" },
-  { href: "/transactions", label: "Sales" },
-  { href: "/leaderboards", label: "Boards" },
-  { href: "/players", label: "Players" },
-  { href: "/regions", label: "Regions" },
-  { href: "/stats", label: "Economy" },
-  { href: "/tools", label: "Tools" },
-  { href: "/server-status", label: "Status" },
+const NAV: [string, string, string][] = [
+  ["diamond", "Prices", "/prices"],
+  ["emerald", "Auction", "/auction"],
+  ["gold_ingot", "Sales", "/transactions"],
+  ["totem_of_undying", "Boards", "/leaderboards"],
+  ["skeleton_skull", "Players", "/players"],
+  ["map", "Regions", "/regions"],
+  ["netherite_ingot", "Economy", "/stats"],
+  ["crafting_table", "Tools", "/tools"],
+  ["beacon", "Status", "/server-status"],
 ];
 
 export function TopNav() {
   return (
     <header className="sticky top-0 z-40 border-b" style={{ background: "var(--bg)" }}>
-      <div className="mx-auto flex h-12 max-w-[1560px] items-center gap-6 px-4">
+      <div className="mx-auto flex h-12 max-w-[1560px] items-center gap-5 px-4">
         <Link href="/" className="shrink-0"><Wordmark /></Link>
 
-        <nav className="hidden flex-1 items-center gap-4 lg:flex">
-          {NAV.map((n) => (
+        <nav className="hidden flex-1 items-center gap-1 lg:flex">
+          {NAV.map(([icon, label, href]) => (
             <Link
-              key={n.href}
-              href={n.href}
-              className="num text-[11px] uppercase tracking-[0.1em] transition-colors hover:text-[var(--gold)]"
-              style={{ color: "var(--muted)" }}
+              key={href}
+              href={href}
+              className="group flex items-center gap-1.5 px-2 py-1 transition-colors"
+              title={label}
             >
-              {n.label}
+              <img
+                src={`/items/${icon}.png`}
+                alt=""
+                width={16}
+                height={16}
+                className="px opacity-60 transition-opacity group-hover:opacity-100"
+              />
+              <span
+                className="num text-[11px] uppercase tracking-[0.08em] transition-colors group-hover:text-[var(--gold)]"
+                style={{ color: "var(--muted)" }}
+              >
+                {label}
+              </span>
             </Link>
           ))}
         </nav>
@@ -45,7 +57,7 @@ export function TopNav() {
           <Search items={SEARCH_ITEMS} players={SEARCH_PLAYERS} prices={SEARCH_PRICES} />
           <Link
             href="/api"
-            className="num border px-2.5 py-1 text-[10.5px] uppercase tracking-[0.1em] transition-colors"
+            className="num hidden border px-2.5 py-1 text-[10.5px] uppercase tracking-[0.1em] transition-colors sm:block"
             style={{ color: "var(--muted)", borderColor: "var(--line)" }}
           >
             API
@@ -62,17 +74,19 @@ export function TopNav() {
 
       {/* Mobile nav strip */}
       <nav
-        className="flex gap-4 overflow-x-auto border-t px-4 py-2 lg:hidden"
+        className="flex gap-3 overflow-x-auto border-t px-4 py-2 lg:hidden"
         style={{ borderColor: "var(--line)" }}
       >
-        {NAV.map((n) => (
+        {NAV.map(([icon, label, href]) => (
           <Link
-            key={n.href}
-            href={n.href}
-            className="num shrink-0 text-[10.5px] uppercase tracking-[0.1em]"
-            style={{ color: "var(--muted)" }}
+            key={href}
+            href={href}
+            className="flex shrink-0 items-center gap-1.5"
           >
-            {n.label}
+            <img src={`/items/${icon}.png`} alt="" width={14} height={14} className="px opacity-60" />
+            <span className="num text-[10.5px] uppercase tracking-[0.08em]" style={{ color: "var(--muted)" }}>
+              {label}
+            </span>
           </Link>
         ))}
       </nav>
@@ -113,46 +127,135 @@ function money(n: number) {
   return `$${n.toFixed(0)}`;
 }
 
+// Every destination gets a real Minecraft texture as its marker, so the footer
+// reads as a visual index instead of three columns of grey text.
+const FOOTER_GROUPS: { title: string; links: [string, string, string][] }[] = [
+  {
+    title: "Market",
+    links: [
+      ["diamond", "Prices", "/prices"],
+      ["emerald", "Auction", "/auction"],
+      ["gold_ingot", "Completed sales", "/transactions"],
+      ["netherite_ingot", "Browse all", "/prices/browse"],
+    ],
+  },
+  {
+    title: "Community",
+    links: [
+      ["totem_of_undying", "Leaderboards", "/leaderboards"],
+      ["skeleton_skull", "Player finder", "/players"],
+      ["beacon", "Server status", "/server-status"],
+      ["map", "Regions", "/regions"],
+    ],
+  },
+  {
+    title: "Platform",
+    links: [
+      ["barrel", "Economy", "/stats"],
+      ["crafting_table", "Tools", "/tools"],
+      ["enchanting_table", "API", "/api"],
+      ["nether_star", "Premium", "/premium"],
+    ],
+  },
+];
+
 export function Footer() {
   return (
-    <footer className="mt-20 border-t" style={{ borderColor: "var(--line)" }}>
-      <div className="mx-auto max-w-[1560px] px-4 py-10">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="relative mt-24 overflow-hidden border-t" style={{ borderColor: "var(--line)" }}>
+      {/* Real block-texture ground running under the footer */}
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-24 opacity-[0.07]"
+        style={{
+          backgroundImage: "url(/items/deepslate.png)",
+          backgroundSize: "56px 56px",
+          imageRendering: "pixelated",
+          maskImage: "linear-gradient(to top, black, transparent)",
+          WebkitMaskImage: "linear-gradient(to top, black, transparent)",
+        }}
+        aria-hidden
+      />
+
+      <div className="relative mx-auto max-w-[1560px] px-4 py-14">
+        {/* Brand block */}
+        <div className="grid gap-10 lg:grid-cols-[1fr_2.2fr]">
           <div>
-            <Wordmark compact />
-            <p className="num mt-3 max-w-[30ch] text-[11px] leading-relaxed" style={{ color: "var(--dim)" }}>
-              Independent community stats platform for DonutSMP. Not affiliated with the DonutSMP team.
+            <Wordmark />
+            <p className="num mt-4 max-w-[32ch] text-[11.5px] leading-relaxed" style={{ color: "var(--dim)" }}>
+              Independent community stats for DonutSMP. Collected by our own bot. Not affiliated
+              with the DonutSMP team.
             </p>
-          </div>
-          {[
-            { t: "Market", l: [["Prices", "/prices"], ["Auction", "/auction"], ["Completed Sales", "/transactions"], ["Browse all", "/prices/browse"]] },
-            { t: "Community", l: [["Leaderboards", "/leaderboards"], ["Player Finder", "/players"], ["Server Status", "/server-status"], ["Regions", "/regions"]] },
-            { t: "Platform", l: [["Economy", "/stats"], ["Tools", "/tools"], ["API", "/api"], ["Premium", "/premium"]] },
-          ].map((col) => (
-            <div key={col.t}>
-              <div className="label mb-3">{col.t}</div>
-              <ul className="space-y-2">
-                {col.l.map(([label, href]) => (
-                  <li key={href}>
-                    <Link href={href} className="num text-[11.5px] transition-colors hover:text-[var(--gold)]"
-                      style={{ color: "var(--muted)" }}>
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+            <div className="mt-5 flex gap-1.5">
+              {["diamond", "netherite_ingot", "elytra", "ancient_debris"].map((b) => (
+                <span key={b} className="slot grid h-8 w-8 place-items-center overflow-hidden">
+                  <img src={`/items/${b}.png`} alt="" width={20} height={20} className="px" />
+                </span>
+              ))}
             </div>
+          </div>
+
+          {/* Visual link index */}
+          <div className="grid gap-8 sm:grid-cols-3">
+            {FOOTER_GROUPS.map((g) => (
+              <div key={g.title}>
+                <div className="label mb-4">{g.title}</div>
+                <ul className="space-y-1.5">
+                  {g.links.map(([icon, label, href]) => (
+                    <li key={href}>
+                      <Link
+                        href={href}
+                        className="group flex items-center gap-2.5 py-1 transition-colors"
+                      >
+                        <span className="slot grid h-6 w-6 shrink-0 place-items-center overflow-hidden transition-colors group-hover:border-[var(--gold)]">
+                          <img
+                            src={`/items/${icon}.png`}
+                            alt=""
+                            width={16}
+                            height={16}
+                            className="px"
+                            loading="lazy"
+                          />
+                        </span>
+                        <span
+                          className="text-[12px] transition-colors group-hover:text-[var(--gold)]"
+                          style={{ color: "var(--muted)" }}
+                        >
+                          {label}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Texture marquee — the footer's closing image */}
+        <div className="mt-12 flex gap-1 overflow-hidden" aria-hidden>
+          {["deepslate", "tuff", "andesite", "granite", "diorite", "calcite",
+            "dripstone_block", "smooth_basalt", "polished_blackstone", "blackstone",
+            "cobbled_deepslate", "polished_deepslate"].map((b, i) => (
+            <img
+              key={i}
+              src={`/items/${b}.png`}
+              alt=""
+              width={26}
+              height={26}
+              className="px shrink-0 opacity-30"
+              loading="lazy"
+            />
           ))}
         </div>
+
         <div
-          className="num mt-10 flex flex-col gap-2 border-t pt-5 text-[10px] sm:flex-row sm:items-center sm:justify-between"
-          style={{ color: "var(--dim)" }}
+          className="num mt-8 flex flex-col gap-3 border-t pt-5 text-[10.5px] sm:flex-row sm:items-center sm:justify-between"
+          style={{ borderColor: "var(--line)", color: "var(--dim)" }}
         >
-          <span>© 2026 DonutSMP Trader // community stats platform</span>
-          <span className="flex gap-4">
-            <Link href="/about" className="hover:text-[var(--ink)]">About</Link>
-            <Link href="/about#privacy" className="hover:text-[var(--ink)]">Privacy</Link>
-            <Link href="/about#terms" className="hover:text-[var(--ink)]">Terms</Link>
+          <span>© 2026 DonutSMP Trader</span>
+          <span className="flex gap-5">
+            <Link href="/about" className="transition-colors hover:text-[var(--ink)]">About</Link>
+            <Link href="/about#privacy" className="transition-colors hover:text-[var(--ink)]">Privacy</Link>
+            <Link href="/about#terms" className="transition-colors hover:text-[var(--ink)]">Terms</Link>
           </span>
         </div>
       </div>

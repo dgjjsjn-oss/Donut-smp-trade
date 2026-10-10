@@ -9,6 +9,8 @@ import { MARKET } from "@/lib/data";
 import { itemBySlug, itemImage, CATEGORY_LABEL } from "@/lib/items";
 import { ItemIconLarge } from "@/components/itemicon";
 
+export const instant = false;
+
 export function generateStaticParams() {
   return MARKET.map((i) => ({ item: i.slug }));
 }
