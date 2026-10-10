@@ -2,11 +2,12 @@ import Link from "next/link";
 import { TopNav, Ticker, Footer } from "@/components/layout";
 import { LiveDot } from "@/components/live";
 import { Panel, Spark, Delta, formatMoney, Meter } from "@/components/ui";
+import { ItemIcon } from "@/components/itemicon";
 import { MARKET, ECONOMY, PLAYERS, SERVER, REGIONS } from "@/lib/data";
-import { itemImage, playerHead } from "@/lib/items";
+import { playerHead } from "@/lib/items";
 
 export const metadata = {
-  title: "DonutSMP Trader — Live Auction Prices, Sales & Player Stats",
+  title: "DonutSMP Trader - Live Auction Prices, Sales & Player Stats",
   description:
     "Live DonutSMP auction prices, completed sales, price history, leaderboards and server stats — collected by our own bot, not a third-party API.",
 };
@@ -25,14 +26,14 @@ export default function Home() {
       <Ticker items={MARKET.slice(0, 9).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
       <style>{`@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
 
-      {/* ── MASTHEAD: asymmetric 2fr/1fr, macro typography, no centred hero ── */}
+      {/* ── MASTHEAD: asymmetric, real item art, no centred hero ── */}
       <section className="mx-auto max-w-[1560px] px-4 pt-12">
         <div className="grid gap-10 lg:grid-cols-[1.75fr_1fr]">
           <div>
             <div className="num mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10.5px]">
               <LiveDot label="LIVE FEED" />
               <span className="label">snapshot {SERVER.updatedMinutesAgo}m ago</span>
-              <span className="label" style={{ color: "var(--dim)" }}>collector online</span>
+              <span className="label">collector online</span>
             </div>
 
             <h1 className="macro">
@@ -49,6 +50,24 @@ export default function Home() {
               from the server by our own bot. No upstream API. No paid provider that can throttle
               us. When the data is old the badge says so.
             </p>
+
+            {/* Real Minecraft art strip — the items traders actually watch */}
+            <div className="mt-8 flex flex-wrap items-end gap-2">
+              {top6.slice(0, 6).map((i) => (
+                <Link
+                  key={i.slug}
+                  href={`/prices/${i.slug}`}
+                  className="group flex flex-col items-center gap-1.5"
+                  title={`${i.name} — ${formatMoney(i.price)}`}
+                >
+                  <ItemIcon material={i.material} name={i.name} size={38} />
+                  <span className="num text-[9.5px] transition-colors group-hover:text-[var(--gold)]"
+                    style={{ color: "var(--dim)" }}>
+                    {formatMoney(i.price)}
+                  </span>
+                </Link>
+              ))}
+            </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-2.5">
               <Link
@@ -149,9 +168,7 @@ export default function Home() {
                   <tr key={i.slug}>
                     <td>
                       <Link href={`/prices/${i.slug}`} className="flex min-w-0 items-center gap-2.5">
-                        <span className="slot grid h-7 w-7 shrink-0 place-items-center overflow-hidden">
-                          <img src={itemImage(i.material, 64)} alt="" width={24} height={24} className="px" />
-                        </span>
+                        <ItemIcon material={i.material} name={i.name} size={26} />
                         <span className="row-ref truncate text-[12.5px] font-medium">{i.name}</span>
                       </Link>
                     </td>
@@ -272,7 +289,7 @@ function MoverColumn({ title, hint, rows, up }: {
               <tr key={i.slug}>
                 <td>
                   <Link href={`/prices/${i.slug}`} className="flex min-w-0 items-center gap-2.5">
-                    <img src={itemImage(i.material, 64)} alt="" width={18} height={18} className="px shrink-0" />
+                    <ItemIcon material={i.material} name={i.name} size={18} />
                     <span className="row-ref truncate text-[12.5px]">{i.name}</span>
                   </Link>
                 </td>

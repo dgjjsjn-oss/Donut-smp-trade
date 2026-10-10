@@ -11,3 +11,5 @@ web/*.done
 web/payload.json
 web/api.log
 
+web/apidoc.json
+
