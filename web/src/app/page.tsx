@@ -2,7 +2,7 @@ import Link from "next/link";
 import { TopNav, Ticker, Footer, formatMoney, pct, changeColor } from "@/components/layout";
 import { LiveDot } from "@/components/live";
 import { itemImage, playerHead } from "@/lib/items";
-import { MARKET, ECONOMY, TOP_PLAYERS, SERVER, REGIONS } from "@/lib/data";
+import { MARKET, ECONOMY, PLAYERS, SERVER, REGIONS } from "@/lib/data";
 
 export default function Home() {
   const top5 = MARKET.slice().sort((a, b) => b.volume24h - a.volume24h).slice(0, 6);
@@ -177,16 +177,14 @@ export default function Home() {
                 </Link>
               </div>
               <div className="space-y-0">
-                {TOP_PLAYERS.slice(0, 7).map((p) => (
+                {PLAYERS.slice(0, 7).map((p, i) => (
                   <Link
                     key={p.name}
                     href={`/players/${p.name}`}
                     className="flex items-center gap-3 py-2 transition-colors hover:bg-[var(--surface2)]"
                     style={{ borderBottom: "1px solid var(--line)" }}
                   >
-                    <span className="num w-5 text-[12px]" style={{ color: "var(--dim)" }}>
-                      {p.rank}
-                    </span>
+                    <span className="num w-5 text-[12px]" style={{ color: "var(--dim)" }}>{i + 1}</span>
                     <img
                       src={playerHead(p.name, 40)}
                       alt=""

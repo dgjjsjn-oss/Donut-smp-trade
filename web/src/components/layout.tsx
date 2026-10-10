@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DonutMark, Wordmark } from "./logo";
 
 export function formatMoney(n: number): string {
   const abs = Math.abs(n);
@@ -22,11 +23,13 @@ export function changeColor(n: number) {
 const NAV = [
   { href: "/prices", label: "Prices" },
   { href: "/auction", label: "Auction" },
+  { href: "/transactions", label: "Sales" },
   { href: "/leaderboards", label: "Leaderboards" },
   { href: "/players", label: "Players" },
   { href: "/regions", label: "Regions" },
+  { href: "/stats", label: "Economy" },
   { href: "/tools", label: "Tools" },
-  { href: "/blog", label: "Blog" },
+  { href: "/server-status", label: "Status" },
 ];
 
 export function TopNav() {
@@ -36,17 +39,7 @@ export function TopNav() {
       className="sticky top-0 z-50 border-b backdrop-blur"
     >
       <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-8 px-5">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <span
-            className="grid h-7 w-7 place-items-center rounded-[3px] num text-xs font-bold"
-            style={{ background: "var(--gold)", color: "#0a0b0e" }}
-          >
-            D
-          </span>
-          <span className="text-[15px] font-semibold tracking-tight">
-            DonutSMP<span style={{ color: "var(--gold)" }}>Trader</span>
-          </span>
-        </Link>
+        <Link href="/" className="flex items-center gap-2.5 shrink-0"><Wordmark /></Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
           {NAV.map((n) => (
@@ -115,10 +108,7 @@ export function Footer() {
       <div className="mx-auto max-w-[1400px] px-5 py-12">
         <div className="grid gap-10 md:grid-cols-4">
           <div>
-            <div className="mb-3 flex items-center gap-2">
-              <span className="grid h-6 w-6 place-items-center rounded-[3px] num text-[11px] font-bold" style={{ background: "var(--gold)", color: "#0a0b0e" }}>D</span>
-              <span className="font-semibold">DonutSMP Trader</span>
-            </div>
+            <Wordmark compact />
             <p className="text-[13px]" style={{ color: "var(--muted)", maxWidth: 280 }}>
               Independent community stats platform for DonutSMP. Not affiliated with the DonutSMP team.
             </p>
