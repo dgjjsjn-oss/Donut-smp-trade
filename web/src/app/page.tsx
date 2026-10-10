@@ -4,8 +4,6 @@ import { LiveDot } from "@/components/live";
 import { itemImage, playerHead } from "@/lib/items";
 import { MARKET, ECONOMY, TOP_PLAYERS, SERVER, REGIONS } from "@/lib/data";
 
-export const dynamic = "force-dynamic";
-
 export default function Home() {
   const top5 = MARKET.slice().sort((a, b) => b.volume24h - a.volume24h).slice(0, 6);
   const gainers = MARKET.slice().sort((a, b) => b.ch24h - a.ch24h).slice(0, 5);

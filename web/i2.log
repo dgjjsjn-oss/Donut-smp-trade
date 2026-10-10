@@ -1,0 +1,35 @@
+npm warn cleanup Failed to remove some directories [
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\nasri\\Desktop\\Donutmptrade\\web\\node_modules\\acorn',
+npm warn cleanup     [Error: EPERM: operation not permitted, rmdir 'C:\Users\nasri\Desktop\Donutmptrade\web\node_modules\acorn'] {
+npm warn cleanup       errno: -4048,
+npm warn cleanup       code: 'EPERM',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\nasri\\Desktop\\Donutmptrade\\web\\node_modules\\acorn'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     '\\\\?\\C:\\Users\\nasri\\Desktop\\Donutmptrade\\web\\node_modules\\next',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'C:\Users\nasri\Desktop\Donutmptrade\web\node_modules\next\dist\server\dev'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\nasri\\Desktop\\Donutmptrade\\web\\node_modules\\next\\dist\\server\\dev'
+npm warn cleanup     }
+npm warn cleanup   ],
+npm warn cleanup   [
+npm warn cleanup     'C:\\Users\\nasri\\Desktop\\Donutmptrade\\web\\node_modules\\next',
+npm warn cleanup     [Error: ENOTEMPTY: directory not empty, rmdir 'C:\Users\nasri\Desktop\Donutmptrade\web\node_modules\next\dist\server\dev'] {
+npm warn cleanup       errno: -4051,
+npm warn cleanup       code: 'ENOTEMPTY',
+npm warn cleanup       syscall: 'rmdir',
+npm warn cleanup       path: 'C:\\Users\\nasri\\Desktop\\Donutmptrade\\web\\node_modules\\next\\dist\\server\\dev'
+npm warn cleanup     }
+npm warn cleanup   ]
+npm warn cleanup ]
+npm error code ENOTEMPTY
+npm error syscall rmdir
+npm error path C:\Users\nasri\Desktop\Donutmptrade\web\node_modules\next\dist
+npm error errno -4051
+npm error ENOTEMPTY: directory not empty, rmdir 'C:\Users\nasri\Desktop\Donutmptrade\web\node_modules\next\dist'
+npm error A complete log of this run can be found in: C:\Users\nasri\AppData\Local\npm-cache\_logs\2026-10-10T20_20_41_936Z-debug-0.log
