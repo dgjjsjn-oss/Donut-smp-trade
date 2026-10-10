@@ -2,10 +2,13 @@ import Link from "next/link";
 import { Wordmark } from "./logo";
 import { Search } from "./search";
 import { ITEMS } from "@/lib/items";
-import { PLAYERS } from "@/lib/data";
+import { PLAYERS, MARKET } from "@/lib/data";
 
 const SEARCH_ITEMS: [string, string][] = ITEMS.map((i) => [i.slug, i.name]);
 const SEARCH_PLAYERS: [string, string][] = PLAYERS.map((p) => [p.name.toLowerCase(), p.name]);
+const SEARCH_PRICES: Record<string, number> = Object.fromEntries(
+  MARKET.map((m) => [m.slug, m.price])
+);
 
 const NAV = [
   { href: "/prices", label: "Prices" },
@@ -39,7 +42,7 @@ export function TopNav() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <Search items={SEARCH_ITEMS} players={SEARCH_PLAYERS} />
+          <Search items={SEARCH_ITEMS} players={SEARCH_PLAYERS} prices={SEARCH_PRICES} />
           <Link
             href="/api"
             className="num border px-2.5 py-1 text-[10.5px] uppercase tracking-[0.1em] transition-colors"
