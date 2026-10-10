@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { itemImage, playerHead } from "@/lib/items";
+import { playerHead } from "@/lib/items";
+import { ItemIcon } from "@/components/itemicon";
 
 export function formatMoney(n: number): string {
   const abs = Math.abs(n);
@@ -30,15 +31,13 @@ export function Delta({ v }: { v: number }) {
   return <span className="num" style={{ color: changeColor(v) }}>{pct(v)}</span>;
 }
 
-/** Real rendered Minecraft texture in an inventory slot bevel. */
+/** Real Minecraft texture in an inventory slot bevel. */
 export function ItemCell({ slug, name, material, sub }: {
   slug: string; name: string; material: string; sub?: string;
 }) {
   return (
     <Link href={`/prices/${slug}`} className="group flex min-w-0 items-center gap-2.5">
-      <span className="slot grid h-7 w-7 shrink-0 place-items-center overflow-hidden">
-        <img src={itemImage(material, 64)} alt="" width={24} height={24} className="px" />
-      </span>
+      <ItemIcon material={material} name={name} size={26} />
       <span className="min-w-0">
         <span className="row-ref block truncate text-[12.5px] font-medium">{name}</span>
         {sub ? <span className="num block text-[10px]" style={{ color: "var(--dim)" }}>{sub}</span> : null}

@@ -265,12 +265,20 @@ export const ITEMS: Item[] = RAW.map(([material, category, stack]) => ({
 
 export const itemBySlug = (slug: string) => ITEMS.find((i) => i.slug === slug);
 
-// Real rendered Minecraft textures — no drawn stand-ins.
-export const itemImage = (material: string, size = 32) =>
-  `https://mc-heads.net/item/${material}/${size}`;
+/**
+ * Real Minecraft textures, self-hosted in /public/items.
+ * Downloaded from the Minecraft assets repo — no third-party CDN, so images
+ * can never break the way mc-heads.net/item did.
+ */
+export const itemImage = (material: string, _size = 32) => `/items/${material}.png`;
 
+/** Player head + full skin render, served by mc-heads.net (verified working). */
 export const playerHead = (name: string, size = 40) =>
   `https://mc-heads.net/avatar/${encodeURIComponent(name)}/${size}`;
+
+/** Full front-facing skin render — used on player profile pages. */
+export const playerRender = (name: string, size = 200) =>
+  `https://mc-heads.net/body/${encodeURIComponent(name)}/${size}`;
 
 export const letterOf = (s: string) => s.charAt(0).toUpperCase();
 

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { TopNav, Ticker, Footer } from "@/components/layout";
 import { Breadcrumb, PageHead, Panel, Stat, formatMoney, formatNum } from "@/components/ui";
 import { PLAYERS, MARKET, REGIONS } from "@/lib/data";
-import { playerHead, itemImage } from "@/lib/items";
+import { playerHead, playerRender, itemImage } from "@/lib/items";
 
 export function generateStaticParams() {
   return PLAYERS.map((p) => ({ name: p.name }));
@@ -37,10 +37,12 @@ export default async function PlayerPage({ params }: { params: Promise<{ name: s
         {/* Profile header — real skin, not an avatar circle */}
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
           <img
-            src={playerHead(p.name, 160)}
-            alt="" width={96} height={96}
-            className="shrink-0 rounded"
-            style={{ imageRendering: "pixelated" }}
+            src={playerRender(p.name, 400)}
+            alt={`${p.name} Minecraft skin`}
+            width={180}
+            height={300}
+            className="px w-[140px] shrink-0 sm:w-[180px]"
+            loading="eager"
           />
           <div className="min-w-0">
             <h1 className="text-[32px] font-semibold leading-none tracking-tight sm:text-[40px]">

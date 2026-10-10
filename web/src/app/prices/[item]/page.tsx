@@ -7,6 +7,7 @@ import {
 } from "@/components/ui";
 import { MARKET } from "@/lib/data";
 import { itemBySlug, itemImage, CATEGORY_LABEL } from "@/lib/items";
+import { ItemIconLarge } from "@/components/itemicon";
 
 export function generateStaticParams() {
   return MARKET.map((i) => ({ item: i.slug }));
@@ -55,8 +56,31 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
 
   const sales = buildSales(m);
 
+  // Structured data so search engines get price + product context, not just text.
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: m.name,
+    description: `${m.name} on the DonutSMP auction house: current lowest listing, price history and completed sales.`,
+    category: CATEGORY_LABEL[meta.category],
+    image: itemImage(m.material, 128),
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "USD",
+      lowPrice: m.price,
+      offerCount: m.listings,
+      availability: m.listings > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <TopNav />
       <Ticker items={MARKET.slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
 
@@ -67,16 +91,7 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
         <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
           <div>
             <div className="flex items-start gap-5">
-              <span
-                className="slot grid h-20 w-20 shrink-0 place-items-center overflow-hidden"
-              >
-                <img
-                  src={itemImage(m.material, 128)}
-                  alt={m.name}
-                  width={72} height={72}
-                  style={{ imageRendering: "pixelated" }}
-                />
-              </span>
+              <ItemIconLarge material={m.material} name={m.name} size={78} />
               <div className="min-w-0">
                 <div className="label mb-2">
                   {CATEGORY_LABEL[meta.category]} · stacks to {meta.stack}
