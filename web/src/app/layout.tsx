@@ -1,18 +1,13 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["400", "500", "600", "700"],
-});
-
-const jetbrains = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains",
-  weight: ["400", "500", "600"],
-});
+// Fonts are loaded at runtime via <link>, not next/font/google.
+// next/font/google fetches at BUILD time, which fails on Render.
+const FONTS = `
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+`;
 
 export const metadata: Metadata = {
   title: "DonutSMP Trader — Live Market, Prices & Player Stats",
@@ -26,12 +21,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${spaceGrotesk.variable} ${jetbrains.variable}`}
-      suppressHydrationWarning
-    >
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://mc-heads.net" />
+        <link rel="dns-prefetch" href="https://mc-heads.net" />
+      </head>
+      <body>
+        <div dangerouslySetInnerHTML={{ __html: FONTS }} />
+        {children}
+      </body>
     </html>
   );
 }
