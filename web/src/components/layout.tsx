@@ -1,30 +1,11 @@
 import Link from "next/link";
-import { DonutMark, Wordmark } from "./logo";
-
-export function formatMoney(n: number): string {
-  const abs = Math.abs(n);
-  const sign = n < 0 ? "-" : "";
-  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`;
-  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(2)}B`;
-  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(2)}M`;
-  if (abs >= 1e3) return `${sign}$${(abs / 1e3).toFixed(1)}K`;
-  return `${sign}$${abs.toFixed(0)}`;
-}
-
-export function pct(n: number) {
-  const s = n > 0 ? "+" : "";
-  return `${s}${n.toFixed(2)}%`;
-}
-
-export function changeColor(n: number) {
-  return n > 0 ? "var(--up)" : n < 0 ? "var(--down)" : "var(--muted)";
-}
+import { Wordmark } from "./logo";
 
 const NAV = [
   { href: "/prices", label: "Prices" },
   { href: "/auction", label: "Auction" },
   { href: "/transactions", label: "Sales" },
-  { href: "/leaderboards", label: "Leaderboards" },
+  { href: "/leaderboards", label: "Boards" },
   { href: "/players", label: "Players" },
   { href: "/regions", label: "Regions" },
   { href: "/stats", label: "Economy" },
@@ -34,19 +15,16 @@ const NAV = [
 
 export function TopNav() {
   return (
-    <header
-      style={{ borderColor: "var(--line)", background: "var(--bg)" }}
-      className="sticky top-0 z-50 border-b backdrop-blur"
-    >
-      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-8 px-5">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0"><Wordmark /></Link>
+    <header className="sticky top-0 z-40 border-b" style={{ background: "var(--bg)" }}>
+      <div className="mx-auto flex h-12 max-w-[1560px] items-center gap-6 px-4">
+        <Link href="/" className="shrink-0"><Wordmark /></Link>
 
-        <nav className="hidden items-center gap-6 lg:flex">
+        <nav className="hidden flex-1 items-center gap-4 lg:flex">
           {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className="text-[13px] transition-colors hover:text-[var(--ink)]"
+              className="num text-[11px] uppercase tracking-[0.1em] transition-colors hover:text-[var(--gold)]"
               style={{ color: "var(--muted)" }}
             >
               {n.label}
@@ -54,47 +32,63 @@ export function TopNav() {
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3">
-          <button
-            className="hidden px-3 py-1.5 text-[12px] transition-colors sm:block"
-            style={{ color: "var(--dim)", border: "1px solid var(--line)" }}
-          >
-            <span className="num">/</span> Search
-          </button>
+        <div className="ml-auto flex items-center gap-2">
           <Link
             href="/api"
-            className="hidden px-3 py-1.5 text-[12px] num transition-colors md:block"
-            style={{ color: "var(--muted)", border: "1px solid var(--line)" }}
+            className="num border px-2.5 py-1 text-[10.5px] uppercase tracking-[0.1em] transition-colors"
+            style={{ color: "var(--muted)", borderColor: "var(--line)" }}
           >
             API
           </Link>
           <Link
             href="/premium"
-            className="px-3.5 py-1.5 text-[12px] font-semibold transition-transform active:scale-95"
+            className="num px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.1em] transition-transform active:scale-95"
             style={{ background: "var(--gold)", color: "#0a0b0e" }}
           >
             Premium
           </Link>
         </div>
       </div>
+
+      {/* Mobile nav strip */}
+      <nav
+        className="flex gap-4 overflow-x-auto border-t px-4 py-2 lg:hidden"
+        style={{ borderColor: "var(--line)" }}
+      >
+        {NAV.map((n) => (
+          <Link
+            key={n.href}
+            href={n.href}
+            className="num shrink-0 text-[10.5px] uppercase tracking-[0.1em]"
+            style={{ color: "var(--muted)" }}
+          >
+            {n.label}
+          </Link>
+        ))}
+      </nav>
     </header>
   );
 }
 
 export function Ticker({ items }: { items: { name: string; price: number; ch: number }[] }) {
+  const line = items.map(
+    (i) => `${i.name} ${money(i.price)} ${i.ch > 0 ? "+" : ""}${i.ch.toFixed(2)}%`
+  );
   return (
-    <div
-      className="w-full overflow-hidden border-b"
-      style={{ borderColor: "var(--line)", background: "var(--surface)" }}
-    >
-      <div className="flex w-max gap-8 px-5 py-1.5" style={{ animation: "marquee 40s linear infinite" }}>
-        {[...items, ...items].map((it, i) => (
-          <span key={i} className="flex items-center gap-2 text-[11px] whitespace-nowrap">
-            <span className="label">{it.name}</span>
-            <span className="num font-medium">{formatMoney(it.price)}</span>
-            <span className="num" style={{ color: changeColor(it.ch) }}>
-              {pct(it.ch)}
-            </span>
+    <div className="w-full overflow-hidden border-b" style={{ background: "var(--surface)" }}>
+      <div
+        className="num flex w-max gap-8 px-4 py-1.5 text-[10.5px] whitespace-nowrap"
+        style={{ animation: "ticker 60s linear infinite", color: "var(--muted)" }}
+      >
+        {[...line, ...line].map((t, i) => (
+          <span key={i}>
+            {t.split(" ").map((part, j) =>
+              part.endsWith("%") ? (
+                <span key={j} style={{
+                  color: part.startsWith("+") ? "var(--up)" : "var(--down)",
+                }}>{part} </span>
+              ) : <span key={j}>{part} </span>
+            )}
           </span>
         ))}
       </div>
@@ -102,28 +96,36 @@ export function Ticker({ items }: { items: { name: string; price: number; ch: nu
   );
 }
 
+function money(n: number) {
+  if (n >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
+  if (n >= 1e6) return `$${(n / 1e6).toFixed(2)}M`;
+  if (n >= 1e3) return `$${(n / 1e3).toFixed(1)}K`;
+  return `$${n.toFixed(0)}`;
+}
+
 export function Footer() {
   return (
-    <footer style={{ borderColor: "var(--line)" }} className="mt-24 border-t">
-      <div className="mx-auto max-w-[1400px] px-5 py-12">
-        <div className="grid gap-10 md:grid-cols-4">
+    <footer className="mt-20 border-t" style={{ borderColor: "var(--line)" }}>
+      <div className="mx-auto max-w-[1560px] px-4 py-10">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Wordmark compact />
-            <p className="text-[13px]" style={{ color: "var(--muted)", maxWidth: 280 }}>
+            <p className="num mt-3 max-w-[30ch] text-[11px] leading-relaxed" style={{ color: "var(--dim)" }}>
               Independent community stats platform for DonutSMP. Not affiliated with the DonutSMP team.
             </p>
           </div>
           {[
-            { t: "Market", l: [["Prices", "/prices"], ["Auction House", "/auction"], ["Completed Sales", "/transactions"], ["Trending", "/prices/trending"]] },
+            { t: "Market", l: [["Prices", "/prices"], ["Auction", "/auction"], ["Completed Sales", "/transactions"], ["Browse all", "/prices/browse"]] },
             { t: "Community", l: [["Leaderboards", "/leaderboards"], ["Player Finder", "/players"], ["Server Status", "/server-status"], ["Regions", "/regions"]] },
-            { t: "Site", l: [["Blog", "/blog"], ["API", "/api"], ["Premium", "/premium"], ["Advertise", "/advertise"]] },
+            { t: "Platform", l: [["Economy", "/stats"], ["Tools", "/tools"], ["API", "/api"], ["Premium", "/premium"]] },
           ].map((col) => (
             <div key={col.t}>
               <div className="label mb-3">{col.t}</div>
               <ul className="space-y-2">
                 {col.l.map(([label, href]) => (
                   <li key={href}>
-                    <Link href={href} className="text-[13px]" style={{ color: "var(--muted)" }}>
+                    <Link href={href} className="num text-[11.5px] transition-colors hover:text-[var(--gold)]"
+                      style={{ color: "var(--muted)" }}>
                       {label}
                     </Link>
                   </li>
@@ -133,14 +135,14 @@ export function Footer() {
           ))}
         </div>
         <div
-          className="mt-12 flex flex-col gap-3 pt-6 text-[11px] sm:flex-row sm:items-center sm:justify-between"
-          style={{ borderTop: "1px solid var(--line)", color: "var(--dim)" }}
+          className="num mt-10 flex flex-col gap-2 border-t pt-5 text-[10px] sm:flex-row sm:items-center sm:justify-between"
+          style={{ color: "var(--dim)" }}
         >
-          <span>© 2026 DonutSMP Trader · Community stats platform</span>
-          <span className="flex gap-5">
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
-            <Link href="/about">About</Link>
+          <span>© 2026 DonutSMP Trader // community stats platform</span>
+          <span className="flex gap-4">
+            <Link href="/about" className="hover:text-[var(--ink)]">About</Link>
+            <Link href="/about#privacy" className="hover:text-[var(--ink)]">Privacy</Link>
+            <Link href="/about#terms" className="hover:text-[var(--ink)]">Terms</Link>
           </span>
         </div>
       </div>

@@ -26,24 +26,22 @@ export function changeColor(n: number) {
   return n > 0 ? "var(--up)" : n < 0 ? "var(--down)" : "var(--muted)";
 }
 
-/** Item row with real rendered texture in a bevelled inventory slot. */
-export function ItemCell({
-  slug, name, material, sub,
-}: { slug: string; name: string; material: string; sub?: string }) {
+export function Delta({ v }: { v: number }) {
+  return <span className="num" style={{ color: changeColor(v) }}>{pct(v)}</span>;
+}
+
+/** Real rendered Minecraft texture in an inventory slot bevel. */
+export function ItemCell({ slug, name, material, sub }: {
+  slug: string; name: string; material: string; sub?: string;
+}) {
   return (
-    <Link href={`/prices/${slug}`} className="flex items-center gap-3 min-w-0 group">
-      <span className="slot grid h-8 w-8 shrink-0 place-items-center overflow-hidden">
-        <img
-          src={itemImage(material, 64)}
-          alt="" width={30} height={30}
-          style={{ imageRendering: "pixelated" }}
-        />
+    <Link href={`/prices/${slug}`} className="group flex min-w-0 items-center gap-2.5">
+      <span className="slot grid h-7 w-7 shrink-0 place-items-center overflow-hidden">
+        <img src={itemImage(material, 64)} alt="" width={24} height={24} className="px" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-[13.5px] font-medium transition-colors group-hover:text-[var(--gold)]">
-          {name}
-        </span>
-        {sub ? <span className="num block text-[11px]" style={{ color: "var(--dim)" }}>{sub}</span> : null}
+        <span className="row-ref block truncate text-[12.5px] font-medium">{name}</span>
+        {sub ? <span className="num block text-[10px]" style={{ color: "var(--dim)" }}>{sub}</span> : null}
       </span>
     </Link>
   );
@@ -51,69 +49,53 @@ export function ItemCell({
 
 export function PlayerCell({ name, sub }: { name: string; sub?: string }) {
   return (
-    <Link href={`/players/${name}`} className="flex items-center gap-3 min-w-0 group">
-      <img
-        src={playerHead(name, 40)} alt="" width={26} height={26}
-        className="shrink-0 rounded-[2px]"
-        style={{ imageRendering: "pixelated" }}
-      />
+    <Link href={`/players/${name}`} className="group flex min-w-0 items-center gap-2.5">
+      <img src={playerHead(name, 40)} alt="" width={22} height={22} className="px shrink-0" />
       <span className="min-w-0">
-        <span className="block truncate text-[13.5px] font-medium transition-colors group-hover:text-[var(--gold)]">
-          {name}
-        </span>
-        {sub ? <span className="num block text-[11px]" style={{ color: "var(--dim)" }}>{sub}</span> : null}
+        <span className="row-ref block truncate text-[12.5px] font-medium">{name}</span>
+        {sub ? <span className="num block text-[10px]" style={{ color: "var(--dim)" }}>{sub}</span> : null}
       </span>
     </Link>
   );
 }
 
-/** Inline price sparkline — real shape from the item's own series. */
-export function Spark({
-  values, color, w = 96, h = 26,
-}: { values: number[]; color: string; w?: number; h?: number }) {
+/** Inline sparkline from the item's own real series. */
+export function Spark({ values, color, w = 88, h = 22 }: {
+  values: number[]; color: string; w?: number; h?: number;
+}) {
   if (!values?.length) return null;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
+  const min = Math.min(...values), max = Math.max(...values);
   const range = max - min || 1;
-  const pad = 3;
-  const pts = values
-    .map((v, i) => {
-      const x = (i / (values.length - 1)) * (w - pad * 2) + pad;
-      const y = h - pad - ((v - min) / range) * (h - pad * 2);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-  const area = `${pad},${h} ${pts} ${w - pad},${h}`;
-  const id = `sg-${color.replace(/[^a-z0-9]/gi, "")}-${w}`;
+  const p = 2;
+  const pts = values.map((v, i) => {
+    const x = (i / (values.length - 1)) * (w - p * 2) + p;
+    const y = h - p - ((v - min) / range) * (h - p * 2);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
   return (
     <svg width={w} height={h} aria-hidden style={{ display: "block" }}>
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={area} fill={`url(#${id})`} />
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.4"
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.3"
         strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
 }
 
-/** Page header — asymmetric, editorial, no centered hero. */
-export function PageHead({
-  eyebrow, title, lede, meta,
-}: { eyebrow?: string; title: string; lede?: string; meta?: React.ReactNode }) {
+/** Terminal-style page header. Asymmetric, bracketed, never centered. */
+export function PageHead({ eyebrow, title, lede, meta }: {
+  eyebrow?: string; title: string; lede?: string; meta?: React.ReactNode;
+}) {
   return (
-    <div className="rule-gold pt-3">
-      {eyebrow ? <div className="label mb-3">{eyebrow}</div> : null}
+    <div className="compartment pt-3">
+      {eyebrow ? (
+        <div className="label mb-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span style={{ color: "var(--gold)" }}>[ {eyebrow} ]</span>
+        </div>
+      ) : null}
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-[30px] font-semibold leading-tight tracking-tight sm:text-[36px]">
-            {title}
-          </h1>
+          <h1 className="h-sec">{title}</h1>
           {lede ? (
-            <p className="mt-3 max-w-[62ch] text-[14px] leading-relaxed" style={{ color: "var(--muted)" }}>
+            <p className="mt-3 max-w-[64ch] text-[13px] leading-relaxed" style={{ color: "var(--muted)" }}>
               {lede}
             </p>
           ) : null}
@@ -124,19 +106,21 @@ export function PageHead({
   );
 }
 
-/** Framed data panel — the double-bezel shell used site-wide. */
-export function Panel({
-  children, className = "", flush = false,
-}: { children: React.ReactNode; className?: string; flush?: boolean }) {
+/** Framed compartment. No rounded corners, no shadow — 1px structure only. */
+export function Panel({ children, className = "", flush = false, title }: {
+  children: React.ReactNode; className?: string; flush?: boolean; title?: string;
+}) {
   return (
-    <div
-      className={`rounded-lg p-px ${className}`}
-      style={{ background: "var(--line)" }}
-    >
-      <div className="rounded-[7px]" style={{ background: "var(--bg)" }}>
-        {flush ? children : <div className="p-5">{children}</div>}
+    <section className={className}>
+      {title ? (
+        <div className="border-b px-4 py-2" style={{ background: "var(--surface)" }}>
+          <span className="label">{title}</span>
+        </div>
+      ) : null}
+      <div className="border border-t-0" style={title ? undefined : { borderTop: undefined }}>
+        {flush ? children : <div className="p-4">{children}</div>}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -145,34 +129,43 @@ export function Stat({ label, value, sub, tone }: {
 }) {
   return (
     <div className="min-w-0">
-      <div className="num truncate text-[22px] font-medium leading-none" style={tone ? { color: tone } : undefined}>
+      <div className="num truncate text-[20px] font-medium leading-none" style={tone ? { color: tone } : undefined}>
         {value}
       </div>
       <div className="label mt-2">{label}</div>
-      {sub ? <div className="num mt-1 text-[11px]" style={{ color: "var(--dim)" }}>{sub}</div> : null}
+      {sub ? <div className="num mt-1 text-[10px]" style={{ color: "var(--dim)" }}>{sub}</div> : null}
     </div>
   );
 }
 
-export function Delta({ v }: { v: number }) {
+/** Zero-radius meters. Bar height fixed, value mono. */
+export function Meter({ label, value, display, max, color, sub }: {
+  label: string; value: number; display: string; max: number; color: string; sub?: string;
+}) {
+  const w = Math.min(100, (value / max) * 100);
   return (
-    <span className="num" style={{ color: changeColor(v) }}>
-      {pct(v)}
-    </span>
+    <div>
+      <div className="mb-1.5 flex items-baseline justify-between gap-3">
+        <span className="truncate text-[11.5px]" style={{ color: "var(--muted)" }}>{label}</span>
+        <span className="num shrink-0 text-[11.5px]">{display}</span>
+      </div>
+      <div className="h-1 w-full" style={{ background: "var(--line)" }}>
+        <div className="h-full" style={{ width: `${w}%`, background: color }} />
+      </div>
+      {sub ? <div className="num mt-1 text-[9.5px]" style={{ color: "var(--dim)" }}>{sub}</div> : null}
+    </div>
   );
 }
 
 export function Breadcrumb({ trail }: { trail: [string, string][] }) {
   return (
-    <nav className="mb-5 flex flex-wrap items-center gap-1.5 text-[12px]" style={{ color: "var(--dim)" }}>
+    <nav className="num mb-5 flex flex-wrap items-center gap-1.5 text-[11px]" style={{ color: "var(--dim)" }}>
       {trail.map(([label, href], i) => (
         <span key={href} className="flex items-center gap-1.5">
-          {i > 0 && <span style={{ color: "var(--line2)" }}>/</span>}
-          {i === trail.length - 1 ? (
-            <span style={{ color: "var(--muted)" }}>{label}</span>
-          ) : (
-            <Link href={href} className="transition-colors hover:text-[var(--ink)]">{label}</Link>
-          )}
+          {i > 0 && <span style={{ color: "var(--line2)" }}>///</span>}
+          {i === trail.length - 1
+            ? <span style={{ color: "var(--muted)" }}>{label}</span>
+            : <Link href={href} className="transition-colors hover:text-[var(--ink)]">{label}</Link>}
         </span>
       ))}
     </nav>
