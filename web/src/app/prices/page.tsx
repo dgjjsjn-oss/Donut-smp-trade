@@ -8,8 +8,7 @@ import { ITEMS, ALPHABET } from "@/lib/items";
 export const instant = false;
 export const metadata = {
   title: "DonutSMP Item Prices — Live Auction Market | DonutSMP Trader",
-  description:
-    "Every DonutSMP item price on the auction house right now: lowest listing, 24h and 7d change, traded volume and listing count. 24h and 7d change, traded volume and listing count.",
+  description: "Current DonutSMP auction prices per item: lowest listing, 24h and 7d change, volume, listing count.",
 };
 type Sort = "volume24h" | "ch24h" | "price" | "listings";
 export default async function Prices({
@@ -39,7 +38,7 @@ export default async function Prices({
         <PageHead
           eyebrow={`${ITEMS.length} items tracked · updated ${SERVER.updatedMinutesAgo}m ago`}
           title="Item prices"
-          lede="The lowest active auction listing for every item we track, with how the price has moved. Completed sales are tracked separately — an active listing is a price someone asked for, a sale is a price someone paid."
+          lede="Lowest active listing per item. Asks, not sales."
           meta={
             <div className="flex gap-6">
               <div className="text-right">

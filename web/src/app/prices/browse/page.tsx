@@ -22,7 +22,7 @@ export default function BrowsePage() {
         <PageHead
           eyebrow={`${ITEMS.length} items in the catalogue`}
           title="Browse everything"
-          lede="The complete item list our collector reports. Items marked with a price have current market data; the rest are tracked and awaiting their next snapshot."
+          lede="Full collector catalogue. Priced items only show a value."
         />
 
         {cats.map((c) => {

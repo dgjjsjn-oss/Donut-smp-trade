@@ -22,7 +22,7 @@ export default function Leaderboards() {
         <PageHead
           eyebrow={`updated ${SERVER.updatedMinutesAgo}m ago`}
           title="Leaderboards"
-          lede="Ten ways to rank a server. Money measures capital, kills measure PvP, playtime measures commitment, and sell earnings measure who actually understands the economy."
+          lede="Ten ways to rank the server."
         />
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

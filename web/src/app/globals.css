@@ -46,12 +46,19 @@
   --s5: 24px; --s6: 32px; --s7: 48px; --s8: 72px;
 
   /* Zero radius. Mechanical rigidity is the point. */
-  --r: 0px;
+  /* Radius split: sharp tiles carry data, pills carry interaction. */
+  --r-tile: 2px;
+  --r-card: 5px;
+  --r-pill: 999px;
+  --r-input: 5px;
 
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-* { border-color: var(--line); border-radius: var(--r); }
+* {
+  border-color: var(--line);
+  border-radius: var(--r-tile);
+}
 
 html {
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
@@ -115,8 +122,8 @@ body::after {
 
 .macro {
   font-size: clamp(2.6rem, 7.5vw, 5.5rem);
-  line-height: 0.9;
-  letter-spacing: -0.045em;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
   font-weight: 700;
 }
 
@@ -217,6 +224,62 @@ table.dense tbody tr:hover .row-ref { color: var(--gold); }
 ::-webkit-scrollbar-thumb:hover { background: var(--dim); }
 
 ::selection { background: var(--gold); color: #0a0b0e; }
+
+
+/* ── OSMO-INSPIRED SPLIT ──────────────────────────────────────────
+   Data-bearing surfaces stay sharp (2-5px). Interactive and status
+   elements become pills. Shape alone signals "action" vs "fact".     */
+
+.pill {
+  border-radius: var(--r-pill);
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+.btn {
+  border-radius: var(--r-pill);
+  padding: 9px 20px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn:active { transform: scale(0.97); }
+
+.badge {
+  border-radius: var(--r-pill);
+  padding: 3px 9px;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Live indicator — the accent that means "switched on". */
+.badge-live {
+  background: color-mix(in srgb, var(--up) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--up) 42%, transparent);
+  color: var(--up);
+}
+.badge-stale {
+  background: color-mix(in srgb, var(--down) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--down) 42%, transparent);
+  color: var(--down);
+}
+
+/* Compressed display — stamped, not set. */
+.display {
+  font-weight: 700;
+  line-height: 0.86;
+  letter-spacing: -0.055em;
+  text-wrap: balance;
+}
+
+/* Sharp tile = carries data. Nothing to click. */
+.tile { border-radius: var(--r-tile); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -23,7 +23,7 @@ export default async function Players({
         <PageHead
           eyebrow={`${PLAYERS.length} tracked · updated ${SERVER.updatedMinutesAgo}m ago`}
           title="Player finder"
-          lede="Every tracked account with its full stat line. Search by name, or browse the boards to find who leads what."
+          lede="Search any tracked account."
         />
         <form action="/players" className="mt-6 flex max-w-md gap-2">
           <input

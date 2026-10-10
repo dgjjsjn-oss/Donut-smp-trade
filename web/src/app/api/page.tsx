@@ -14,7 +14,7 @@ export default function ApiPage() {
         <PageHead
           eyebrow="Free · read-only · no key required"
           title="Public API"
-          lede="The same data that powers this site, as JSON. Built for bots, dashboards and Discord embeds. Rate limited, cached, and free."
+          lede="Read-only JSON. 120 req/min per IP."
         />
 
         <div className="mt-8 grid gap-4 lg:grid-cols-2">

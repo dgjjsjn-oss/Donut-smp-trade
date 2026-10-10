@@ -116,7 +116,7 @@ export function Search({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="num flex items-center gap-2 border px-2.5 py-1 text-[10.5px] uppercase tracking-[0.1em] transition-colors hover:border-[var(--line2)]"
+        className="pill num flex items-center gap-2 border text-[10.5px] uppercase tracking-[0.08em] hover:border-[var(--line2)]"
         style={{ color: "var(--dim)", borderColor: "var(--line)" }}
         aria-label="Open search"
         aria-keyshortcuts="Control+K"

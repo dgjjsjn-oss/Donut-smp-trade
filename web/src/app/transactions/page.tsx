@@ -26,7 +26,7 @@ export default async function Transactions({
         <PageHead
           eyebrow={`${rows.length} sales recorded · last ${SERVER.updatedMinutesAgo}m ago`}
           title={focus ? `${MARKET.find((m) => m.slug === focus)?.name} sales` : "Completed sales"}
-          lede="An active listing is a price someone asked for. A completed sale is a price someone accepted. This is the second one."
+          lede="Completed trades. What buyers actually paid."
         />
         <div className="mt-7" style={{ border: "1px solid var(--line)" }}>
           <table className="dense w-full min-w-[860px]">

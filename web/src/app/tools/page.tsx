@@ -19,7 +19,7 @@ export default function ToolsPage() {
         <PageHead
           eyebrow={`${ITEMS.length} items · ${MARKET.length} priced`}
           title="Trading tools"
-          lede="Three tools that turn the price table into decisions: what a stack is worth, which items are worth undercutting, and where the spread is widest."
+          lede="Stack values, flip candidates, widest spreads."
         />
 
         <div className="mt-8 grid gap-4 lg:grid-cols-3">

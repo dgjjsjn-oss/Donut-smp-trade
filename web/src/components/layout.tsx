@@ -33,7 +33,7 @@ export function TopNav() {
             <Link
               key={href}
               href={href}
-              className="group flex items-center gap-1.5 px-2 py-1 transition-colors"
+              className="pill group flex items-center gap-1.5 py-1 transition-colors"
               title={label}
             >
               <img
@@ -57,14 +57,14 @@ export function TopNav() {
           <Search items={SEARCH_ITEMS} players={SEARCH_PLAYERS} prices={SEARCH_PRICES} />
           <Link
             href="/api"
-            className="num hidden border px-2.5 py-1 text-[10.5px] uppercase tracking-[0.1em] transition-colors sm:block"
+            className="pill num hidden border text-[10.5px] uppercase tracking-[0.08em] sm:block"
             style={{ color: "var(--muted)", borderColor: "var(--line)" }}
           >
             API
           </Link>
           <Link
             href="/premium"
-            className="num px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.1em] transition-transform active:scale-95"
+            className="btn px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.08em]"
             style={{ background: "var(--gold)", color: "#0a0b0e" }}
           >
             Premium
@@ -81,7 +81,7 @@ export function TopNav() {
           <Link
             key={href}
             href={href}
-            className="flex shrink-0 items-center gap-1.5"
+            className="pill flex shrink-0 items-center gap-1.5"
           >
             <img src={`/items/${icon}.png`} alt="" width={14} height={14} className="px opacity-60" />
             <span className="num text-[10.5px] uppercase tracking-[0.08em]" style={{ color: "var(--muted)" }}>
@@ -203,7 +203,7 @@ export function Footer() {
                     <li key={href}>
                       <Link
                         href={href}
-                        className="group flex items-center gap-2.5 py-1 transition-colors"
+                        className="pill group flex items-center gap-2.5 py-1 transition-colors"
                       >
                         <span className="slot grid h-6 w-6 shrink-0 place-items-center overflow-hidden transition-colors group-hover:border-[var(--gold)]">
                           <img

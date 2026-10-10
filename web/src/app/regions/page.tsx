@@ -19,7 +19,7 @@ export default function RegionsPage() {
         <PageHead
           eyebrow={`${formatNum(total)} players distributed · updated ${SERVER.updatedMinutesAgo}m ago`}
           title="Server regions"
-          lede="DonutSMP splits its world across six regions. Where your friends are decides your ping, and where the population is decides what you can trade."
+          lede="Population per region. Ping follows population."
         />
 
         {/* Map — a real proportion bar, not a decorative fake map */}

@@ -2,8 +2,8 @@ import { TopNav, Footer } from "@/components/layout";
 import { PageHead, Panel } from "@/components/ui";
 
 export const metadata = {
-  title: "DonutSMP Trader — About, Privacy, Terms",
-  description: "What DonutSMP Trader is, how data is collected, and the terms of use.",
+  title: "About, Privacy & Terms — DonutSMP Trader",
+  description: "How DonutSMP Trader collects data, privacy policy and terms of use.",
 };
 
 export default function About() {
@@ -14,7 +14,7 @@ export default function About() {
         <PageHead
           eyebrow="Independent community project"
           title="What this is"
-          lede="DonutSMP Trader is a read-only statistics site for the DonutSMP server. We are not affiliated with, endorsed by, or operated by the DonutSMP team."
+          lede="Read-only statistics for the DonutSMP server."
         />
 
         <div className="mt-9 grid gap-4 lg:grid-cols-3">

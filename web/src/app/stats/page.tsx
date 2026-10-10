@@ -35,7 +35,7 @@ export default function StatsPage() {
         <PageHead
           eyebrow={`${ECONOMY.activePlayers.toLocaleString()} active players · data ${SERVER.updatedMinutesAgo}m old`}
           title="Server statistics"
-          lede="Aggregate numbers across every tracked account. These are sums, not estimates — each figure is the running total the server itself reports."
+          lede="Server-wide sums. Running totals, not estimates."
         />
 
         <div className="mt-8 grid grid-cols-2 gap-px sm:grid-cols-3 lg:grid-cols-5"

@@ -56,14 +56,14 @@ export default function Home() {
               <div className="mt-8 flex flex-wrap items-center gap-2.5">
                 <Link
                   href="/prices"
-                  className="px-5 py-2.5 text-[12.5px] font-semibold transition-transform active:scale-[0.98]"
+                  className="btn px-5 py-2.5 text-[12.5px] font-semibold"
                   style={{ background: "var(--gold)", color: "#0a0b0e" }}
                 >
                   All prices
                 </Link>
                 <Link
                   href="/auction"
-                  className="num border px-5 py-2.5 text-[12px] transition-colors hover:border-[var(--line2)]"
+                  className="btn num border px-5 py-2.5 text-[12px] hover:border-[var(--line2)]"
                   style={{ borderColor: "var(--line2)" }}
                 >
                   Auction

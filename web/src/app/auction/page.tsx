@@ -27,7 +27,7 @@ export default async function Auction({
         <PageHead
           eyebrow={`${listings.length} active listings · refreshed ${SERVER.updatedMinutesAgo}m ago`}
           title={focus ? `${MARKET.find((m) => m.slug === focus)?.name} listings` : "Auction house"}
-          lede="Every listing currently on the auction house, with the seller and the asking price. Prices here are what sellers want — check completed sales before you commit."
+          lede="Live asks, sorted high to low. Cross-check against completed sales before buying."
         />
         {focus ? (
           <Link

@@ -39,7 +39,7 @@ export default function Premium() {
         <PageHead
           eyebrow="Not launched yet"
           title="Premium"
-          lede="The free site is not going away. Paid tiers exist for people who want alerts and deeper data, not to put the basics behind a wall."
+          lede="Free tier stays free. Paid adds alerts and history depth."
         />
 
         <div className="mt-9 grid gap-4 lg:grid-cols-3">

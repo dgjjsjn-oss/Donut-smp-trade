@@ -22,7 +22,7 @@ export default function ServerStatus() {
         <PageHead
           eyebrow={`checked ${SERVER.updatedMinutesAgo}m ago`}
           title="Server status"
-          lede="Connection health as reported by the collector when it last reached the server."
+          lede="Last reading from the collector."
           meta={
             <div className="flex items-center gap-2.5">
               <span
