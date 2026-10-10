@@ -24,6 +24,7 @@
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-pixel: "Silkscreen", "Courier New", monospace;
 }
 
 :root {
@@ -104,6 +105,14 @@ body::after {
 }
 
 /* Macro typography — massive, tight, viewport-driven */
+
+/* Pixel display face — the game signal. Used sparingly. */
+.pixel {
+  font-family: "Silkscreen", "Courier New", monospace;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
 .macro {
   font-size: clamp(2.6rem, 7.5vw, 5.5rem);
   line-height: 0.9;

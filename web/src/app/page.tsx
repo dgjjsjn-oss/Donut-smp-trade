@@ -3,22 +3,20 @@ import { TopNav, Ticker, Footer } from "@/components/layout";
 import { LiveDot } from "@/components/live";
 import { Panel, Spark, Delta, formatMoney, Meter } from "@/components/ui";
 import { ItemIcon } from "@/components/itemicon";
-import { MARKET, ECONOMY, PLAYERS, SERVER, REGIONS } from "@/lib/data";
+import { MARKET, PLAYERS, SERVER, REGIONS } from "@/lib/data";
 import { playerHead } from "@/lib/items";
 
 export const metadata = {
-  title: "DonutSMP Trader - Live Auction Prices, Sales & Player Stats",
+  title: "DonutSMP Trader - Live Auction Prices",
   description:
-    "Live DonutSMP auction prices, completed sales, price history, leaderboards and server stats — collected by our own bot, not a third-party API.",
+    "Live DonutSMP auction prices, completed sales and player stats. Collected by our own bot.",
 };
 
 export default function Home() {
-  const top6 = MARKET.slice().sort((a, b) => b.volume24h - a.volume24h).slice(0, 6);
+  const top = MARKET.slice().sort((a, b) => b.volume24h - a.volume24h).slice(0, 6);
   const gainers = MARKET.slice().sort((a, b) => b.ch24h - a.ch24h).slice(0, 5);
   const losers = MARKET.slice().sort((a, b) => a.ch24h - b.ch24h).slice(0, 5);
-  const totalRegional = REGIONS.reduce((s, r) => s + r.players, 0);
-  const up = MARKET.filter((i) => i.ch24h > 0).length;
-  const down = MARKET.filter((i) => i.ch24h < 0).length;
+  const maxRegion = Math.max(...REGIONS.map((r) => r.players));
 
   return (
     <>
@@ -26,148 +24,105 @@ export default function Home() {
       <Ticker items={MARKET.slice(0, 9).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
       <style>{`@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
 
-      {/* ── MASTHEAD: asymmetric, real item art, no centred hero ── */}
-      <section className="mx-auto max-w-[1560px] px-4 pt-12">
-        <div className="grid gap-10 lg:grid-cols-[1.75fr_1fr]">
+      {/* ── HERO: item sprites first, almost no words ── */}
+      <section className="mx-auto max-w-[1560px] px-4 pt-10">
+        <div className="grid gap-10 lg:grid-cols-[1.8fr_1fr]">
           <div>
-            <div className="num mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10.5px]">
-              <LiveDot label="LIVE FEED" />
-              <span className="label">snapshot {SERVER.updatedMinutesAgo}m ago</span>
-              <span className="label">collector online</span>
+            <div className="num mb-6 flex flex-wrap items-center gap-x-4 text-[10.5px]">
+              <LiveDot label="LIVE" />
+              <span className="label">{SERVER.updatedMinutesAgo}m ago</span>
             </div>
 
-            <h1 className="macro">
-              The DonutSMP<br />
-              <span style={{ color: "var(--dim)" }}>market, read</span> at<br />
-              trader speed.
-            </h1>
-
-            <p
-              className="mt-7 max-w-[54ch] text-[14px] leading-relaxed"
-              style={{ color: "var(--muted)" }}
-            >
-              Auction listings, completed sales, price history and player standings — collected
-              from the server by our own bot. No upstream API. No paid provider that can throttle
-              us. When the data is old the badge says so.
-            </p>
-
-            {/* Real Minecraft art strip — the items traders actually watch */}
-            <div className="mt-8 flex flex-wrap items-end gap-2">
-              {top6.slice(0, 6).map((i) => (
+            {/* Hero item strip — big real Minecraft art */}
+            <div className="flex flex-wrap items-start gap-3 sm:gap-4">
+              {top.slice(0, 4).map((i, idx) => (
                 <Link
                   key={i.slug}
                   href={`/prices/${i.slug}`}
-                  className="group flex flex-col items-center gap-1.5"
-                  title={`${i.name} — ${formatMoney(i.price)}`}
+                  className="group"
+                  style={{ transform: `translateY(${idx % 2 ? 26 : 0}px)` }}
                 >
-                  <ItemIcon material={i.material} name={i.name} size={38} />
-                  <span className="num text-[9.5px] transition-colors group-hover:text-[var(--gold)]"
-                    style={{ color: "var(--dim)" }}>
-                    {formatMoney(i.price)}
-                  </span>
+                  <ItemIcon
+                    material={i.material}
+                    name={i.name}
+                    size={idx === 0 ? 88 : 68}
+                  />
                 </Link>
               ))}
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-2.5">
+            <h1 className="macro pixel mt-8" style={{ fontSize: "clamp(2.4rem, 6.5vw, 4.6rem)" }}>MARKET</h1>
+
+            <div className="mt-7 flex flex-wrap items-center gap-2.5">
               <Link
                 href="/prices"
                 className="px-5 py-2.5 text-[12.5px] font-semibold transition-transform active:scale-[0.98]"
                 style={{ background: "var(--gold)", color: "#0a0b0e" }}
               >
-                Browse item prices
+                All prices
               </Link>
               <Link
-                href="/transactions"
-                className="num border px-5 py-2.5 text-[12.5px] transition-colors hover:border-[var(--line2)]"
+                href="/auction"
+                className="num border px-5 py-2.5 text-[12px] transition-colors hover:border-[var(--line2)]"
                 style={{ borderColor: "var(--line2)" }}
               >
-                Completed sales
+                Auction
               </Link>
-              <Link href="/api" className="num px-2 py-2.5 text-[11.5px]" style={{ color: "var(--dim)" }}>
-                /api →
+              <Link href="/leaderboards" className="num px-2 py-2.5 text-[11.5px]" style={{ color: "var(--dim)" }}>
+                Boards →
               </Link>
             </div>
           </div>
 
-          {/* ── TELEMETRY RAIL ── */}
-          <div>
-            <Panel title="Server telemetry">
-              <div className="num text-[44px] font-semibold leading-none">
-                {SERVER.online.toLocaleString()}
-              </div>
-              <div className="num mt-2 text-[11px]" style={{ color: "var(--dim)" }}>
-                players online // {SERVER.ping}ms // v{SERVER.version}
-              </div>
-
-              <div className="mt-4 h-1 w-full" style={{ background: "var(--line)" }}>
-                <div className="h-full" style={{
-                  width: `${(SERVER.online / SERVER.max) * 100}%`, background: "var(--gold)",
-                }} />
-              </div>
-
-              <div className="gridline mt-5 grid grid-cols-2">
-                {[
-                  ["Items priced", String(MARKET.length)],
-                  ["Catalogue", "600+"],
-                  ["Rising 24h", `+${up}`],
-                  ["Falling 24h", String(down)],
-                ].map(([k, v]) => (
-                  <div key={k} className="px-3 py-2.5">
-                    <div className="num text-[16px] font-medium leading-none">{v}</div>
-                    <div className="label mt-1.5">{k}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-5 space-y-2.5">
-                {REGIONS.slice(0, 4).map((r) => (
-                  <Meter
-                    key={r.id}
-                    label={r.name}
-                    value={r.players}
-                    display={r.players.toLocaleString()}
-                    max={Math.max(...REGIONS.map((x) => x.players))}
-                    color="var(--blue)"
-                  />
-                ))}
-              </div>
-            </Panel>
-          </div>
+          {/* Telemetry rail — numbers only */}
+          <Panel title="Server">
+            <div className="num text-[46px] font-semibold leading-none">
+              {SERVER.online.toLocaleString()}
+            </div>
+            <div className="num mt-2 text-[10.5px]" style={{ color: "var(--dim)" }}>
+              online // {SERVER.ping}ms // v{SERVER.version}
+            </div>
+            <div className="mt-4 h-1 w-full" style={{ background: "var(--line)" }}>
+              <div className="h-full" style={{
+                width: `${(SERVER.online / SERVER.max) * 100}%`, background: "var(--gold)",
+              }} />
+            </div>
+            <div className="mt-5 space-y-2.5">
+              {REGIONS.slice(0, 4).map((r) => (
+                <Meter key={r.id} label={r.short} value={r.players}
+                  display={r.players.toLocaleString()} max={maxRegion} color="var(--blue)" />
+              ))}
+            </div>
+          </Panel>
         </div>
       </section>
 
       {/* ── MARKET TABLE ── */}
-      <section className="mx-auto mt-16 max-w-[1560px] px-4">
-        <div className="compartment flex flex-wrap items-end justify-between gap-3 pt-3">
-          <div>
-            <span className="label" style={{ color: "var(--gold)" }}>[ Market by traded volume ]</span>
-            <h2 className="h-sec mt-2">Highest turnover</h2>
-          </div>
-          <Link href="/prices" className="num text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--gold)" }}>
-            All items →
+      <section className="mx-auto mt-14 max-w-[1560px] px-4">
+        <div className="compartment flex items-end justify-between pt-3">
+          <span className="label" style={{ color: "var(--gold)" }}>[ By volume ]</span>
+          <Link href="/prices" className="num text-[11px]" style={{ color: "var(--muted)" }}>
+            All →
           </Link>
         </div>
-
-        <Panel flush className="mt-4">
+        <Panel flush className="mt-3">
           <div className="overflow-x-auto">
-            <table className="dense min-w-[880px]">
+            <table className="dense min-w-[820px]">
               <thead>
                 <tr>
                   <th>Item</th>
-                  <th className="text-right">Lowest</th>
+                  <th className="text-right">Price</th>
                   <th className="text-right">24h</th>
                   <th className="text-right">7d</th>
-                  <th className="text-right">24h volume</th>
-                  <th className="text-right">Listings</th>
-                  <th className="w-28 text-right">7d trend</th>
+                  <th className="text-right">Vol</th>
+                  <th className="w-24 text-right">Trend</th>
                 </tr>
               </thead>
               <tbody>
-                {top6.map((i) => (
+                {top.map((i) => (
                   <tr key={i.slug}>
                     <td>
-                      <Link href={`/prices/${i.slug}`} className="flex min-w-0 items-center gap-2.5">
+                      <Link href={`/prices/${i.slug}`} className="flex items-center gap-2.5">
                         <ItemIcon material={i.material} name={i.name} size={26} />
                         <span className="row-ref truncate text-[12.5px] font-medium">{i.name}</span>
                       </Link>
@@ -177,9 +132,6 @@ export default function Home() {
                     <td className="text-right"><Delta v={i.ch7d} /></td>
                     <td className="num text-right" style={{ color: "var(--muted)" }}>
                       {formatMoney(i.volume24h)}
-                    </td>
-                    <td className="num text-right" style={{ color: "var(--muted)" }}>
-                      {i.listings.toLocaleString()}
                     </td>
                     <td className="flex justify-end pr-3">
                       <Spark values={i.spark} color={i.ch7d >= 0 ? "var(--up)" : "var(--down)"} />
@@ -192,36 +144,32 @@ export default function Home() {
         </Panel>
       </section>
 
-      {/* ── MOVERS + BOARD — deliberately different rhythm ── */}
-      <section className="mx-auto mt-16 max-w-[1560px] px-4">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1fr_1.15fr]">
-          <MoverColumn title="Top gainers" hint="24h" rows={gainers} up />
-          <MoverColumn title="Top losers" hint="24h" rows={losers} />
+      {/* ── MOVERS + PLAYERS ── */}
+      <section className="mx-auto mt-14 max-w-[1560px] px-4">
+        <div className="grid gap-8 lg:grid-cols-3">
+          <Movers title="Gainers" rows={gainers} up />
+          <Movers title="Losers" rows={losers} />
 
           <div>
             <div className="compartment flex items-center justify-between pt-3">
-              <span className="label" style={{ color: "var(--gold)" }}>[ Richest players ]</span>
-              <Link href="/leaderboards" className="num text-[10.5px] uppercase tracking-[0.1em]"
-                style={{ color: "var(--muted)" }}>
-                Full board →
+              <span className="label" style={{ color: "var(--gold)" }}>[ Richest ]</span>
+              <Link href="/leaderboards" className="num text-[10.5px]" style={{ color: "var(--muted)" }}>
+                All →
               </Link>
             </div>
             <Panel flush className="mt-3">
               <table className="dense">
                 <tbody>
-                  {PLAYERS.slice(0, 7).map((p, i) => (
+                  {PLAYERS.slice(0, 6).map((p, i) => (
                     <tr key={p.name}>
-                      <td className="num w-8 text-right" style={{ color: i < 3 ? "var(--gold)" : "var(--dim)" }}>
+                      <td className="num w-7 text-right" style={{ color: i < 3 ? "var(--gold)" : "var(--dim)" }}>
                         {i + 1}
                       </td>
                       <td>
-                        <Link href={`/players/${p.name}`} className="flex min-w-0 items-center gap-2.5">
-                          <img src={playerHead(p.name, 40)} alt="" width={22} height={22} className="px shrink-0" />
+                        <Link href={`/players/${p.name}`} className="flex items-center gap-2.5">
+                          <img src={playerHead(p.name, 40)} alt="" width={20} height={20} className="px" />
                           <span className="row-ref truncate text-[12.5px] font-medium">{p.name}</span>
                         </Link>
-                      </td>
-                      <td className="num text-right" style={{ color: "var(--dim)" }}>
-                        {p.kills.toLocaleString()}k
                       </td>
                       <td className="num text-right font-medium">{formatMoney(p.money)}</td>
                     </tr>
@@ -233,54 +181,16 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── ECONOMY GRID — 1px razor dividers, no cards ── */}
-      <section className="mx-auto mt-16 max-w-[1560px] px-4">
-        <div className="compartment flex flex-wrap items-end justify-between gap-3 pt-3">
-          <div>
-            <span className="label" style={{ color: "var(--gold)" }}>[ Server economy ]</span>
-            <h2 className="h-sec mt-2">Lifetime totals</h2>
-          </div>
-          <Link href="/stats" className="num text-[11px] uppercase tracking-[0.1em]" style={{ color: "var(--gold)" }}>
-            Breakdown →
-          </Link>
-        </div>
-
-        <div className="gridline mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
-          {[
-            ["Total money held", formatMoney(ECONOMY.totalMoney)],
-            ["Shards collected", formatMoney(ECONOMY.shards)],
-            ["PvP kills", formatMoney(ECONOMY.kills)],
-            ["Blocks broken", formatMoney(ECONOMY.blocksBroken)],
-            ["Sold at /sell", formatMoney(ECONOMY.sellEarned)],
-            ["Blocks placed", formatMoney(ECONOMY.blocksPlaced)],
-            ["Mobs killed", formatMoney(ECONOMY.mobsKilled)],
-            ["Shop purchases", formatMoney(ECONOMY.shopSpend)],
-            ["Deaths", formatMoney(ECONOMY.deaths)],
-            ["Playtime", `${ECONOMY.playtimeYears.toLocaleString()} yrs`],
-          ].map(([k, v]) => (
-            <div key={k} className="px-4 py-5">
-              <div className="num text-[19px] font-medium leading-none">{v}</div>
-              <div className="label mt-2.5">{k}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <Footer />
     </>
   );
 }
 
-function MoverColumn({ title, hint, rows, up }: {
-  title: string; hint: string; rows: typeof MARKET; up?: boolean;
-}) {
+function Movers({ title, rows, up }: { title: string; rows: typeof MARKET; up?: boolean }) {
   return (
     <div>
       <div className="compartment pt-3">
-        <div className="flex items-baseline justify-between">
-          <span className="label" style={{ color: "var(--gold)" }}>[ {title} ]</span>
-          <span className="label">{hint}</span>
-        </div>
+        <span className="label" style={{ color: up ? "var(--up)" : "var(--down)" }}>[ {title} ]</span>
       </div>
       <Panel flush className="mt-3">
         <table className="dense">
@@ -288,7 +198,7 @@ function MoverColumn({ title, hint, rows, up }: {
             {rows.map((i) => (
               <tr key={i.slug}>
                 <td>
-                  <Link href={`/prices/${i.slug}`} className="flex min-w-0 items-center gap-2.5">
+                  <Link href={`/prices/${i.slug}`} className="flex items-center gap-2.5">
                     <ItemIcon material={i.material} name={i.name} size={18} />
                     <span className="row-ref truncate text-[12.5px]">{i.name}</span>
                   </Link>
@@ -296,7 +206,7 @@ function MoverColumn({ title, hint, rows, up }: {
                 <td className="num text-right" style={{ color: "var(--muted)" }}>
                   {formatMoney(i.price)}
                 </td>
-                <td className="num w-16 text-right font-medium" style={{ color: up ? "var(--up)" : "var(--down)" }}>
+                <td className="num w-14 text-right font-medium" style={{ color: up ? "var(--up)" : "var(--down)" }}>
                   {i.ch24h > 0 ? "+" : ""}{i.ch24h.toFixed(1)}%
                 </td>
               </tr>
