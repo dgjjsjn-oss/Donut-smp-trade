@@ -5,20 +5,17 @@ import {
   Breadcrumb, PageHead, Panel, Stat, Delta, Spark,
   formatMoney, formatNum, pct, changeColor,
 } from "@/components/ui";
-import { MARKET } from "@/lib/data";
+import { marketItems, marketBySlug, live } from "@/lib/read";
 import { itemBySlug, itemImage, CATEGORY_LABEL } from "@/lib/items";
 import { ItemIconLarge } from "@/components/itemicon";
 
 export const instant = false;
 
-export function generateStaticParams() {
-  return MARKET.map((i) => ({ item: i.slug }));
-}
 
 export async function generateMetadata({ params }: { params: Promise<{ item: string }> }) {
   const { item } = await params;
   const meta = itemBySlug(item);
-  const m = MARKET.find((x) => x.slug === item);
+  const m = marketBySlug(item);
   if (!meta || !m) return { title: "Item not found" };
   return {
     title: `${m.name} Price on DonutSMP — ${formatMoney(m.price)} | DonutSMP Trader`,
@@ -29,9 +26,10 @@ export async function generateMetadata({ params }: { params: Promise<{ item: str
 const RANGES = ["24h", "7d", "30d", "90d", "All"] as const;
 
 export default async function ItemPage({ params }: { params: Promise<{ item: string }> }) {
+  await live();
   const { item } = await params;
   const meta = itemBySlug(item);
-  const m = MARKET.find((x) => x.slug === item);
+  const m = marketBySlug(item);
   if (!meta || !m) notFound();
 
   // Deterministic pseudo-history derived from the real current price + real 24h/7d change.
@@ -51,7 +49,7 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
     verdict = { text: "Mid range", tone: "var(--muted)", note: "No edge from price position alone. Volume is the signal here." };
   }
 
-  const related = MARKET
+  const related = marketItems()
     .filter((x) => x.slug !== item && x.slug.split("_")[0] !== item.split("_")[0])
     .sort((a, b) => Math.abs(a.price - m.price) - Math.abs(b.price - m.price))
     .slice(0, 4);
@@ -84,7 +82,7 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <TopNav />
-      <Ticker items={MARKET.slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
+      <Ticker items={marketItems().slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
 
       <div className="mx-auto max-w-[1400px] px-5 pt-8">
         <Breadcrumb trail={[["Prices", "/prices"], [m.name, `/prices/${m.slug}`]]} />
@@ -342,7 +340,7 @@ function buildSeries(price: number, ch7d: number) {
   return out;
 }
 
-function buildSales(m: (typeof MARKET)[number]) {
+function buildSales(m: ReturnType<typeof marketBySlug> & object) {
   const names = ["jesticc", "rtkprime", "Ehxy", "BabyBeetroot", "DonutUnc", "Jeadox", "ClownPierce", "Vitalasy"];
   const times = ["2m ago", "8m ago", "14m ago", "23m ago", "31m ago", "47m ago", "1h ago", "2h ago"];
   return times.map((at, i) => {

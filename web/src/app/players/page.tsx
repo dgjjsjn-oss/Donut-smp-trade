@@ -4,6 +4,7 @@ import { TopNav, Ticker, Footer } from "@/components/layout";
 import { PageHead, PlayerCell, formatMoney } from "@/components/ui";
 import { PLAYERS, BOARDS, boardValue, SERVER } from "@/lib/data";
 
+import { live } from "@/lib/read";
 export const instant = false;
 export const metadata = {
   title: "Player Finder — Search DonutSMP Players",
@@ -12,6 +13,7 @@ export const metadata = {
 export default async function Players({
   searchParams,
 }: { searchParams: Promise<{ q?: string }> }) {
+  await live();
   const sp = await searchParams;
   const q = (sp.q ?? "").trim().toLowerCase();
   const hits = q ? PLAYERS.filter((p) => p.name.toLowerCase().includes(q)) : PLAYERS;

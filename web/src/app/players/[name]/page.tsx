@@ -5,6 +5,7 @@ import { Breadcrumb, PageHead, Panel, Stat, formatMoney, formatNum } from "@/com
 import { PLAYERS, MARKET, REGIONS } from "@/lib/data";
 import { playerHead, playerRender, itemImage } from "@/lib/items";
 
+import { live } from "@/lib/read";
 export const instant = false;
 
 export function generateStaticParams() {
@@ -20,6 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ name: str
 }
 
 export default async function PlayerPage({ params }: { params: Promise<{ name: string }> }) {
+  await live();
   const { name } = await params;
   const p = PLAYERS.find((x) => x.name.toLowerCase() === name.toLowerCase());
   if (!p) notFound();

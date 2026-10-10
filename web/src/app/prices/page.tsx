@@ -2,12 +2,13 @@ import Link from "next/link";
 
 import { TopNav, Ticker, Footer } from "@/components/layout";
 import { PageHead, ItemCell, Spark, Delta, formatMoney, formatNum, Panel } from "@/components/ui";
-import { MARKET, SERVER } from "@/lib/data";
+import { SERVER } from "@/lib/data";
+import { marketItems, live } from "@/lib/read";
 import { ITEMS, ALPHABET } from "@/lib/items";
 
 export const instant = false;
 export const metadata = {
-  title: "DonutSMP Item Prices — Live Auction Market | DonutSMP Trader",
+  title: "DonutSMP Item Prices — Live Auction marketItems() | DonutSMP Trader",
   description: "Current DonutSMP auction prices per item: lowest listing, 24h and 7d change, volume, listing count.",
 };
 type Sort = "volume24h" | "ch24h" | "price" | "listings";
@@ -16,10 +17,11 @@ export default async function Prices({
 }: {
   searchParams: Promise<{ sort?: string; q?: string }>;
 }) {
+  await live();
   const sp = await searchParams;
   const sort = (sp.sort ?? "volume24h") as Sort;
   const q = (sp.q ?? "").toLowerCase();
-  let rows = MARKET.slice();
+  let rows = marketItems().slice();
   if (q) rows = rows.filter((r) => r.name.toLowerCase().includes(q) || r.material.includes(q));
   const sorted = rows.sort((a, b) => {
     if (sort === "ch24h") return b.ch24h - a.ch24h;
@@ -28,12 +30,12 @@ export default async function Prices({
     return b.volume24h - a.volume24h;
   });
   const setSort = (s: Sort) => `/prices?sort=${s}${q ? `&q=${q}` : ""}`;
-  const gainers = MARKET.filter((i) => i.ch24h > 0).length;
-  const losers = MARKET.filter((i) => i.ch24h < 0).length;
+  const gainers = marketItems().filter((i) => i.ch24h > 0).length;
+  const losers = marketItems().filter((i) => i.ch24h < 0).length;
   return (
     <>
       <TopNav />
-      <Ticker items={MARKET.slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
+      <Ticker items={marketItems().slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
       <div className="mx-auto max-w-[1400px] px-5 pt-10">
         <PageHead
           eyebrow={`${ITEMS.length} items tracked · updated ${SERVER.updatedMinutesAgo}m ago`}
@@ -125,7 +127,7 @@ export default async function Prices({
           </div>
         </div>
         <p className="num mt-4 text-[11px]" style={{ color: "var(--dim)" }}>
-          Showing {sorted.length} of {MARKET.length} priced items · {ITEMS.length} in the full catalogue
+          Showing {sorted.length} of {marketItems().length} priced items · {ITEMS.length} in the full catalogue
         </p>
       </div>
       <Footer />

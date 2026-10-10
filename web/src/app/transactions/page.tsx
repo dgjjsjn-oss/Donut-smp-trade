@@ -1,7 +1,10 @@
 import { TopNav, Ticker, Footer } from "@/components/layout";
 
 import { PageHead, ItemCell, formatMoney, pct, changeColor } from "@/components/ui";
-import { MARKET, SERVER } from "@/lib/data";
+import { SERVER } from "@/lib/data";
+type MarketRow = ReturnType<typeof marketItems>[number];
+
+import { marketItems, marketBySlug, live } from "@/lib/read";
 import { playerHead } from "@/lib/items";
 
 export const instant = false;
@@ -12,20 +15,21 @@ export const metadata = {
 export default async function Transactions({
   searchParams,
 }: { searchParams: Promise<{ item?: string }> }) {
+  await live();
   const sp = await searchParams;
   const focus = sp.item;
   const sources = focus
-    ? MARKET.filter((m) => m.slug === focus)
-    : MARKET.slice(0, 8);
+    ? marketItems().filter((m) => m.slug === focus)
+    : marketItems().slice(0, 8);
   const rows = buildTransactions(sources);
   return (
     <>
       <TopNav />
-      <Ticker items={MARKET.slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
+      <Ticker items={marketItems().slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
       <div className="mx-auto max-w-[1400px] px-5 pt-10">
         <PageHead
           eyebrow={`${rows.length} sales recorded · last ${SERVER.updatedMinutesAgo}m ago`}
-          title={focus ? `${MARKET.find((m) => m.slug === focus)?.name} sales` : "Completed sales"}
+          title={focus ? `${marketItems().find((m) => m.slug === focus)?.name} sales` : "Completed sales"}
           lede="Completed trades. What buyers actually paid."
         />
         <div className="mt-7" style={{ border: "1px solid var(--line)" }}>
@@ -65,7 +69,7 @@ const NAMES = ["jesticc", "rtkprime", "Ehxy", "BabyBeetroot", "DonutUnc", "Jeado
   "ClownPierce", "Vitalasy", "iditity", "rekrapp2", "DrDonutt", "Marlowww", "doughboy", "RTKprimo"];
 const TIMES = ["1m ago", "3m ago", "6m ago", "9m ago", "12m ago", "18m ago", "24m ago",
   "29m ago", "36m ago", "42m ago", "51m ago", "1h ago", "1h ago", "2h ago"];
-function buildTransactions(items: (typeof MARKET)[number][]) {
+function buildTransactions(items: MarketRow[]) {
   const out: {
     id: string; slug: string; name: string; material: string;
     seller: string; buyer: string; price: number; stack: number; diff: number; at: string;

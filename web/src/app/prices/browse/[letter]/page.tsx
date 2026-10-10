@@ -4,6 +4,7 @@ import { TopNav, Footer } from "@/components/layout";
 import { Breadcrumb, ItemCell, PageHead, formatMoney } from "@/components/ui";
 import { ItemIcon } from "@/components/itemicon";
 import { ALPHABET, ITEMS, itemsByLetter } from "@/lib/items";
+import { live } from "@/lib/read";
 import { MARKET } from "@/lib/data";
 
 export function generateStaticParams() {
@@ -20,7 +21,10 @@ export async function generateMetadata({ params }: { params: Promise<{ letter: s
   };
 }
 
+export const instant = false;
+
 export default async function BrowseLetter({ params }: { params: Promise<{ letter: string }> }) {
+  await live();
   const { letter } = await params;
   const L = letter.toUpperCase();
   if (!ALPHABET.includes(L)) notFound();

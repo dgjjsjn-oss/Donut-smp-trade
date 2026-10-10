@@ -2,7 +2,10 @@ import Link from "next/link";
 
 import { TopNav, Ticker, Footer } from "@/components/layout";
 import { PageHead, ItemCell, Panel, formatMoney, formatNum, pct, changeColor } from "@/components/ui";
-import { MARKET, SERVER } from "@/lib/data";
+import { SERVER } from "@/lib/data";
+type MarketRow = ReturnType<typeof marketItems>[number];
+
+import { marketItems, marketBySlug, live } from "@/lib/read";
 import { itemImage, playerHead } from "@/lib/items";
 
 export const instant = false;
@@ -13,20 +16,21 @@ export const metadata = {
 export default async function Auction({
   searchParams,
 }: { searchParams: Promise<{ item?: string }> }) {
+  await live();
   const sp = await searchParams;
   const focus = sp.item;
   const source = focus
-    ? MARKET.filter((m) => m.slug === focus)
-    : MARKET.sort((a, b) => b.listings - a.listings).slice(0, 10);
+    ? marketItems().filter((m) => m.slug === focus)
+    : marketItems().sort((a, b) => b.listings - a.listings).slice(0, 10);
   const listings = buildListings(source);
   return (
     <>
       <TopNav />
-      <Ticker items={MARKET.slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
+      <Ticker items={marketItems().slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
       <div className="mx-auto max-w-[1400px] px-5 pt-10">
         <PageHead
           eyebrow={`${listings.length} active listings · refreshed ${SERVER.updatedMinutesAgo}m ago`}
-          title={focus ? `${MARKET.find((m) => m.slug === focus)?.name} listings` : "Auction house"}
+          title={focus ? `${marketItems().find((m) => m.slug === focus)?.name} listings` : "Auction house"}
           lede="Live asks, sorted high to low. Cross-check against completed sales before buying."
         />
         {focus ? (
@@ -55,7 +59,7 @@ export default async function Auction({
                 <tr key={l.id}>
                   <td><ItemCell slug={l.slug} name={l.name} material={l.material} /></td>
                   <td>
-                    <Link href={`/players/${l.seller}`} className="flex items-center gap-2">
+                    <Link href={`/rankedPlayers()/${l.seller}`} className="flex items-center gap-2">
                       <img src={playerHead(l.seller, 40)} alt="" width={20} height={20}
                         className="rounded-[2px]" style={{ imageRendering: "pixelated" }} />
                       <span className="text-[12.5px]" style={{ color: "var(--muted)" }}>{l.seller}</span>
@@ -75,9 +79,9 @@ export default async function Auction({
         <Panel className="mt-8">
           <div className="grid gap-6 sm:grid-cols-3">
             {[
-              ["Total active listings", MARKET.reduce((s, m) => s + m.listings, 0).toLocaleString()],
-              ["Value on the books", formatMoney(MARKET.reduce((s, m) => s + m.price * m.listings, 0))],
-              ["Items listed", String(MARKET.length)],
+              ["Total active listings", marketItems().reduce((s, m) => s + m.listings, 0).toLocaleString()],
+              ["Value on the books", formatMoney(marketItems().reduce((s, m) => s + m.price * m.listings, 0))],
+              ["Items listed", String(marketItems().length)],
             ].map(([k, v]) => (
               <div key={k}>
                 <div className="num text-[20px] font-medium">{v}</div>
@@ -91,7 +95,7 @@ export default async function Auction({
     </>
   );
 }
-function buildListings(items: (typeof MARKET)[number][]) {
+function buildListings(items: MarketRow[]) {
   const sellers = ["jesticc", "rtkprime", "Ehxy", "BabyBeetroot", "DonutUnc", "Jeadox",
     "ClownPierce", "Vitalasy", "iditity", "rekrapp2", "DrDonutt", "Marlowww"];
   const out: {

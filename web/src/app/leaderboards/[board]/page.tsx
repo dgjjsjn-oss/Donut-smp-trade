@@ -5,6 +5,7 @@ import { Breadcrumb, PageHead, formatMoney, formatNum } from "@/components/ui";
 import { BOARDS, PLAYERS, boardValue, type BoardKey } from "@/lib/data";
 import { playerHead } from "@/lib/items";
 
+import { live } from "@/lib/read";
 export const instant = false;
 
 export function generateStaticParams() {
@@ -22,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ board: st
 }
 
 export default async function BoardPage({ params }: { params: Promise<{ board: string }> }) {
+  await live();
   const { board } = await params;
   const b = BOARDS.find((x) => x.key === board);
   if (!b) notFound();
