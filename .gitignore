@@ -5,3 +5,6 @@ web/install.done
 web/dev.log
 .env*.local
 
+web/*.log
+web/*.done
+
