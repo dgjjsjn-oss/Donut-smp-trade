@@ -1,0 +1,7 @@
+web/node_modules/
+web/.next/
+web/install.log
+web/install.done
+web/dev.log
+.env*.local
+
