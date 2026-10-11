@@ -4,7 +4,7 @@ import { TopNav, Ticker, Footer } from "@/components/layout";
 import { Breadcrumb, Delta, formatMoney, pct } from "@/components/ui";
 import { ItemIconLarge, ItemIcon } from "@/components/itemicon";
 import { itemBySlug, itemImage, CATEGORY_LABEL } from "@/lib/items";
-import { marketItems, marketBySlug, live } from "@/lib/read";
+import { marketItems, marketBySlug, live, dataAgeMinutes } from "@/lib/read";
 
 export const instant = false;
 
@@ -61,6 +61,20 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
     },
   };
 
+  // Freshness comes from the live snapshot when the bot is pushing, and falls
+  // back to the static baseline otherwise. Never a hardcoded string.
+  const age = dataAgeMinutes();
+  const ageLabel =
+    age == null
+      ? "just now"
+      : age < 1
+        ? "less than a minute"
+        : age === 1
+          ? "1m"
+          : age < 60
+            ? `${Math.floor(age)}m`
+            : `${Math.floor(age / 60)}h ${Math.floor(age % 60)}m`;
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
@@ -79,7 +93,7 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
           <span>{CATEGORY_LABEL[meta.category]}</span>
           <span>stacks to {meta.stack}</span>
           <span>id {m.material}</span>
-          <span className="ml-auto">updated {SERVER_AGE} ago</span>
+          <span className="ml-auto">updated {ageLabel} ago</span>
         </div>
 
         {/* ── SPLIT: data panel | chart panel ── */}
@@ -146,7 +160,7 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
               <Link
                 href={`/auction?item=${m.slug}`}
                 className="btn px-4 py-2.5 text-[12.5px] font-semibold"
-                style={{ background: "var(--gold)", color: "#0a0b0e" }}
+                style={{ background: "var(--gold)", color: "var(--on-gold)" }}
               >
                 Live listings
               </Link>
@@ -181,7 +195,7 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
                     className={i === 1 ? "badge" : "pill num text-[10px]"}
                     style={
                       i === 1
-                        ? { background: "var(--gold)", color: "#0a0b0e" }
+                        ? { background: "var(--gold)", color: "var(--on-gold)" }
                         : { color: "var(--dim)", border: "1px solid var(--line)" }
                     }
                   >
@@ -253,7 +267,7 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
   );
 }
 
-const SERVER_AGE = "2m";
+
 
 function Chart({ values, color }: { values: number[]; color: string }) {
   const w = 720, h = 240, p = 10;

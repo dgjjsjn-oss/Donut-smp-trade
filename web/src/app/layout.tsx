@@ -45,7 +45,7 @@ export default function RootLayout({
         <a
           href="#main"
           className="num sr-only text-[12px] focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:px-4 focus:py-2"
-          style={{ background: "var(--gold)", color: "#0a0b0e" }}
+          style={{ background: "var(--gold)", color: "var(--bg)" }}
         >
           Skip to content
         </a>

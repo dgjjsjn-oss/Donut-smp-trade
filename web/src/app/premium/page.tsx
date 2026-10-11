@@ -44,12 +44,12 @@ export default function Premium() {
 
         <div className="mt-9 grid gap-4 lg:grid-cols-3">
           {tiers.map((t) => (
-            <div key={t.name} className="rounded-lg p-px"
+            <div key={t.name} className="rounded-[3px] p-px"
               style={{ background: t.featured ? "var(--gold)" : "var(--line)" }}>
               <div className="h-full rounded-[7px] p-6" style={{ background: "var(--bg)" }}>
                 {t.featured ? (
                   <div className="num mb-3 inline-block px-2 py-0.5 text-[10px] tracking-wider"
-                    style={{ background: "var(--gold)", color: "#0a0b0e" }}>
+                    style={{ background: "var(--gold)", color: "var(--on-gold)" }}>
                     MOST CHOSEN
                   </div>
                 ) : null}
@@ -69,7 +69,7 @@ export default function Premium() {
                 <button
                   className="mt-6 w-full px-4 py-2.5 text-[13px] font-semibold transition-transform active:scale-[0.98]"
                   style={t.featured
-                    ? { background: "var(--gold)", color: "#0a0b0e" }
+                    ? { background: "var(--gold)", color: "var(--on-gold)" }
                     : { border: "1px solid var(--line2)", color: "var(--ink)" }}
                 >
                   {t.cta}

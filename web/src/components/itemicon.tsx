@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { itemImage } from "@/lib/items";
+import { itemImage, hasFlatTexture } from "@/lib/items";
 
 /**
  * Minecraft item icon in an inventory-slot bevel.
@@ -19,13 +19,14 @@ export function ItemIcon({
   className?: string;
 }) {
   const [failed, setFailed] = useState(false);
+  const showFallback = failed || !hasFlatTexture(material);
 
   return (
     <span
       className={`slot grid shrink-0 place-items-center overflow-hidden ${className}`}
       style={{ width: size + 8, height: size + 8 }}
     >
-      {failed ? (
+      {showFallback ? (
         <span
           className="num px-1 text-center text-[8px] uppercase leading-tight"
           style={{ color: "var(--dim)" }}
@@ -54,12 +55,13 @@ export function ItemIconLarge({ material, name, size = 72 }: {
   material: string; name: string; size?: number;
 }) {
   const [failed, setFailed] = useState(false);
+  const showFallback = failed || !hasFlatTexture(material);
   return (
     <span
       className="slot grid shrink-0 place-items-center overflow-hidden"
       style={{ width: size + 20, height: size + 20 }}
     >
-      {failed ? (
+      {showFallback ? (
         <span className="num text-[11px]" style={{ color: "var(--dim)" }}>
           {name}
         </span>

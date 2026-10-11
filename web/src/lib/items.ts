@@ -272,6 +272,21 @@ export const itemBySlug = (slug: string) => ITEMS.find((i) => i.slug === slug);
  */
 export const itemImage = (material: string, _size = 32) => `/items/${material}.png`;
 
+/**
+ * Blocks that exist in Minecraft only as 3D models — the asset repo ships no
+ * flat PNG for them. Listing them here means the UI renders a labelled slot
+ * immediately instead of firing a request that will always 404.
+ */
+const MODEL_ONLY = new Set([
+  "boat", "breeze_rod", "carpet", "chest", "chest_boat", "clock", "compass",
+  "crossbow", "decorated_pot", "dragon_head", "empty_map", "ender_chest",
+  "heavy_core", "horse_armor", "mace", "magma_block", "ominous_trial_key",
+  "quartz_ore", "recovery_compass", "shield", "snow_block", "stained_glass",
+  "sticky_piston", "tipped_arrow", "trapped_chest", "turtle_scute", "wind_charge",
+]);
+
+export const hasFlatTexture = (material: string) => !MODEL_ONLY.has(material);
+
 /** Player head + full skin render, served by mc-heads.net (verified working). */
 export const playerHead = (name: string, size = 40) =>
   `https://mc-heads.net/avatar/${encodeURIComponent(name)}/${size}`;

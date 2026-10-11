@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { hasFlatTexture } from "@/lib/items";
 
 type Kind = "item" | "player" | "page";
 type Entry = { label: string; sub: string; href: string; kind: Kind; price?: number };
@@ -8,6 +9,27 @@ type Group = { kind: Kind; label: string; rows: Entry[] };
 
 const RECENT_KEY = "dst_recent";
 const MAX_RECENT = 6;
+
+/**
+ * Item thumbnail for search results. Blocks that exist only as 3D models have no
+ * flat texture, so they render an empty inventory slot instead of firing a
+ * request that would always 404.
+ */
+function itemThumb(material: string) {
+  if (!hasFlatTexture(material)) {
+    return <span className="slot grid h-5 w-5 shrink-0 place-items-center" aria-hidden />;
+  }
+  return (
+    <img
+      src={`/items/${material}.png`}
+      alt=""
+      width={20}
+      height={20}
+      className="px shrink-0"
+      onError={(ev) => { (ev.target as HTMLImageElement).style.visibility = "hidden"; }}
+    />
+  );
+}
 
 const PAGES: Entry[] = [
   { label: "Item prices", sub: "all tracked items", href: "/prices", kind: "page" },
@@ -191,16 +213,7 @@ export function Search({
                           className="flex w-full items-center gap-3 px-3 py-2 text-left transition-colors"
                           style={{ background: i === cursor ? "var(--surface2)" : "transparent" }}
                         >
-                          {r.kind === "item" ? (
-                            <img
-                              src={`/items/${r.sub}.png`}
-                              alt=""
-                              width={20}
-                              height={20}
-                              className="px shrink-0"
-                              onError={(ev) => { (ev.target as HTMLImageElement).style.visibility = "hidden"; }}
-                            />
-                          ) : r.kind === "player" ? (
+                          {r.kind === "item" ? itemThumb(r.sub) : r.kind === "player" ? (
                             <img
                               src={`https://mc-heads.net/avatar/${encodeURIComponent(r.label)}/40`}
                               alt=""

@@ -94,7 +94,7 @@ export default async function Home() {
 
               <div className="mt-8 flex flex-wrap items-center gap-2.5">
                 <Link href="/prices" className="btn px-5 py-2.5 text-[12.5px] font-semibold"
-                  style={{ background: "var(--gold)", color: "#0a0b0e" }}>
+                  style={{ background: "var(--gold)", color: "var(--on-gold)" }}>
                   All prices
                 </Link>
                 <Link href="/auction" className="btn num border px-5 py-2.5 text-[12px] hover:border-[var(--line2)]"

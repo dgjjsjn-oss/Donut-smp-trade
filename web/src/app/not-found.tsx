@@ -15,7 +15,7 @@ export default function NotFound() {
           </p>
           <div className="mt-8 flex flex-wrap gap-2.5">
             <Link href="/prices" className="px-5 py-2.5 text-[12.5px] font-semibold transition-transform active:scale-[0.98]"
-              style={{ background: "var(--gold)", color: "#0a0b0e" }}>
+              style={{ background: "var(--gold)", color: "var(--bg)" }}>
               Browse item prices
             </Link>
             <Link href="/" className="num border px-5 py-2.5 text-[12.5px]"

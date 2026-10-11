@@ -75,7 +75,7 @@ export default async function Prices({
           ))}
         </div>
         {/* Table */}
-        <div className="mt-5 overflow-x-auto rounded-lg p-px" style={{ background: "var(--line)" }}>
+        <div className="mt-5 overflow-x-auto rounded-[3px] p-px" style={{ background: "var(--line)" }}>
           <div style={{ background: "var(--bg)" }} className="overflow-x-auto">
             <table className="dense w-full min-w-[900px]">
               <thead>

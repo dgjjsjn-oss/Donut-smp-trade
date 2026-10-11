@@ -48,7 +48,7 @@ export default async function PlayersPage({
           <button
             type="submit"
             className="btn px-5 text-[13px] font-medium"
-            style={{ background: "var(--gold)", color: "#0a0b0e" }}
+            style={{ background: "var(--gold)", color: "var(--on-gold)" }}
           >
             Search
           </button>

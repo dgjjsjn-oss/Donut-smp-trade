@@ -72,7 +72,7 @@ export function TopNav() {
           <Link
             href="/premium"
             className="btn px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.08em]"
-            style={{ background: "var(--gold)", color: "#0a0b0e" }}
+            style={{ background: "var(--gold)", color: "var(--on-gold)" }}
           >
             Premium
           </Link>
