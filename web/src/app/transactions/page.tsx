@@ -65,8 +65,8 @@ export default async function Transactions({
     </>
   );
 }
-const NAMES = ["jesticc", "rtkprime", "Ehxy", "BabyBeetroot", "DonutUnc", "Jeadox",
-  "ClownPierce", "Vitalasy", "iditity", "rekrapp2", "DrDonutt", "Marlowww", "doughboy", "RTKprimo"];
+const NAMES = ["jesticc", "rtkprime", "Ehxy", "DonutUnc", "Jeadox",
+  "iditity", "LoadFc", "cruell", "BabyBeetroot", "AidansGamingYT", "RTKprime", "Squintom"];
 const TIMES = ["1m ago", "3m ago", "6m ago", "9m ago", "12m ago", "18m ago", "24m ago",
   "29m ago", "36m ago", "42m ago", "51m ago", "1h ago", "1h ago", "2h ago"];
 function buildTransactions(items: MarketRow[]) {

@@ -7,7 +7,8 @@
 // Everything the ingest endpoint writes goes through here. Pages read through
 // here too, so a live snapshot replaces seed data the moment the bot pushes.
 
-import { MARKET, PLAYERS, SERVER, type MarketItem, type Player } from "./data";
+import { MARKET, SERVER, type MarketItem } from "./data";
+import type { Player } from "./players";
 
 export type Snapshot = {
   type: "prices" | "listings" | "sales" | "players" | "status";
@@ -28,7 +29,7 @@ const g = globalThis as unknown as { __donutdb?: DB };
 function seed(): DB {
   return {
     prices: new Map(MARKET.map((m) => [m.slug, { ...m }])),
-    players: new Map(PLAYERS.map((p) => [p.name.toLowerCase(), { ...p }])),
+    players: new Map<string, Player>(),
     status: {
       online: SERVER.online,
       max: SERVER.max,
@@ -135,15 +136,17 @@ export function ingest(payload: unknown): IngestResult {
         ch24h: typeof row.ch24h === "number" ? row.ch24h : (prev?.ch24h ?? 0),
         online: prev?.online ?? true,
         seen: prev?.seen ?? "now",
-        kills: typeof row.kills === "number" ? row.kills : prev?.kills ?? 0,
-        deaths: typeof row.deaths === "number" ? row.deaths : prev?.deaths ?? 0,
-        shards: typeof row.shards === "number" ? row.shards : prev?.shards ?? 0,
-        blocksPlaced: typeof row.blocksPlaced === "number" ? row.blocksPlaced : prev?.blocksPlaced ?? 0,
-        blocksBroken: typeof row.blocksBroken === "number" ? row.blocksBroken : prev?.blocksBroken ?? 0,
-        mobsKilled: typeof row.mobsKilled === "number" ? row.mobsKilled : prev?.mobsKilled ?? 0,
-        shopSpend: typeof row.shopSpend === "number" ? row.shopSpend : prev?.shopSpend ?? 0,
-        sellEarned: typeof row.sellEarned === "number" ? row.sellEarned : prev?.sellEarned ?? 0,
-        playtimeDays: typeof row.playtimeDays === "number" ? row.playtimeDays : prev?.playtimeDays ?? 0,
+        kills: typeof row.kills === "number" ? row.kills : prev?.kills ?? null,
+        deaths: typeof row.deaths === "number" ? row.deaths : prev?.deaths ?? null,
+        shards: typeof row.shards === "number" ? row.shards : prev?.shards ?? null,
+        blocksPlaced: typeof row.blocksPlaced === "number" ? row.blocksPlaced : prev?.blocksPlaced ?? null,
+        blocksBroken: typeof row.blocksBroken === "number" ? row.blocksBroken : prev?.blocksBroken ?? null,
+        mobsKilled: typeof row.mobsKilled === "number" ? row.mobsKilled : prev?.mobsKilled ?? null,
+        shopSpend: typeof row.shopSpend === "number" ? row.shopSpend : prev?.shopSpend ?? null,
+        sellEarned: typeof row.sellEarned === "number" ? row.sellEarned : prev?.sellEarned ?? null,
+        playtimeDays: typeof row.playtimeDays === "number" ? row.playtimeDays : prev?.playtimeDays ?? null,
+        views: prev?.views ?? 0,
+        featured: prev?.featured ?? false,
       });
       accepted++;
     }
@@ -175,7 +178,7 @@ export const allPrices = (): MarketItem[] =>
 export const priceFor = (slug: string) => db().prices.get(slug);
 
 export const allPlayers = (): Player[] =>
-  [...db().players.values()].sort((a, b) => b.money - a.money);
+  [...db().players.values()].sort((a, b) => (b.money ?? 0) - (a.money ?? 0));
 
 export const playerFor = (name: string) => db().players.get(name.toLowerCase());
 

@@ -24,6 +24,7 @@ export default async function Home() {
   const gainers = marketItems().slice().sort((a, b) => b.ch24h - a.ch24h).slice(0, 5);
   const losers = marketItems().slice().sort((a, b) => a.ch24h - b.ch24h).slice(0, 5);
   const maxRegion = Math.max(...REGIONS.map((r) => r.players));
+  const top6Players = rankedPlayers().slice().sort((a, b) => b.views - a.views).slice(0, 8);
 
   // Real market structure, derived from the live store.
   const onBooks = marketItems().reduce((s, m) => s + m.price * m.listings, 0);
@@ -191,21 +192,23 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── SERVERS + rankedPlayers() — asymmetric ── */}
+{/* Server telemetry + real player index */}
       <section className="mx-auto mt-16 max-w-[1560px] px-4">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
+        <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
           <div>
-            <span className="label" style={{ color: "var(--gold)" }}>[ Server ]</span>
-            <div className="num mt-4 text-[52px] font-semibold leading-none">
+            <div className="compartment pt-3">
+              <span className="label" style={{ color: "var(--gold)" }}>[ Server ]</span>
+            </div>
+            <div className="num mt-5 text-[58px] font-semibold leading-none tracking-tight">
               {SERVER.online.toLocaleString()}
             </div>
             <div className="num mt-2 text-[10.5px]" style={{ color: "var(--dim)" }}>
               online // {SERVER.ping}ms // v{SERVER.version}
             </div>
-            <div className="mt-5 h-1 w-full" style={{ background: "var(--line)" }}>
+            <div className="mt-6 h-1 w-full" style={{ background: "var(--line)" }}>
               <div className="h-full" style={{ width: `${(SERVER.online / SERVER.max) * 100}%`, background: "var(--gold)" }} />
             </div>
-            <div className="mt-6 space-y-3">
+            <div className="mt-7 space-y-3">
               {REGIONS.map((r) => (
                 <Meter key={r.id} label={r.name} value={r.players}
                   display={r.players.toLocaleString()} max={maxRegion} color="var(--blue)" />
@@ -214,41 +217,50 @@ export default async function Home() {
           </div>
 
           <div>
-            <div className="flex items-end justify-between">
-              <span className="label" style={{ color: "var(--gold)" }}>[ Richest ]</span>
-              <Link href="/leaderboards" className="num text-[11px]" style={{ color: "var(--muted)" }}>All →</Link>
+            <div className="compartment flex items-end justify-between pt-3">
+              <span className="label" style={{ color: "var(--gold)" }}>
+                [ Most looked up · 30d ]
+              </span>
+              <Link href="/leaderboards" className="num text-[10.5px]" style={{ color: "var(--muted)" }}>
+                All →
+              </Link>
             </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {rankedPlayers().slice(0, 6).map((p, i) => (
+            <div className="mt-4 flex flex-wrap gap-2">
+              {top6Players.map((p, i) => (
                 <Link
                   key={p.name}
-                  href={`/rankedPlayers()/${p.name}`}
-                  className="group border p-3 transition-colors hover:border-[var(--line2)]"
-                  style={{ borderColor: "var(--line)" }}
+                  href={`/players/${p.name}`}
+                  className="group flex items-center gap-2.5"
                 >
-                  <img
-                    src={`https://mc-heads.net/body/${encodeURIComponent(p.name)}/300`}
-                    alt={`${p.name} skin`}
-                    width={300}
-                    height={500}
-                    className="px h-24 w-full object-contain object-bottom"
-                    loading="lazy"
-                  />
-                  <div className="mt-2 flex items-baseline gap-2">
-                    <span className="num text-[10px]" style={{ color: i < 3 ? "var(--gold)" : "var(--dim)" }}>
-                      #{i + 1}
-                    </span>
+                  <span
+                    className="slot grid h-9 w-9 shrink-0 place-items-center overflow-hidden transition-colors group-hover:border-[var(--gold)]"
+                  >
+                    <img
+                      src={`https://mc-heads.net/avatar/${encodeURIComponent(p.name)}/80`}
+                      alt=""
+                      width={26}
+                      height={26}
+                      className="px"
+                      loading="lazy"
+                    />
+                  </span>
+                  <span className="flex flex-col">
                     <span className="row-ref truncate text-[12px] font-medium">{p.name}</span>
-                  </div>
-                  <div className="num mt-1 text-[12px]" style={{ color: "var(--muted)" }}>
-                    {formatMoney(p.money)}
-                  </div>
+                    <span className="num text-[9.5px]" style={{ color: "var(--dim)" }}>
+                      {i + 1}. {p.views >= 1000 ? `${(p.views / 1000).toFixed(1)}K` : p.views} views
+                    </span>
+                  </span>
                 </Link>
               ))}
             </div>
+            <p className="num mt-6 max-w-[46ch] text-[11px] leading-relaxed" style={{ color: "var(--dim)" }}>
+              Real usernames and real 30-day profile views. Balances and kill counts stay blank
+              until the collector reports them — a fabricated balance is worse than no balance.
+            </p>
           </div>
         </div>
       </section>
+      {/* ── SERVERS + rankedPlayers() — asymmetric ── */}
 
       <Footer />
     </>

@@ -2,10 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TopNav, Ticker, Footer } from "@/components/layout";
 import { Breadcrumb, PageHead, formatMoney, formatNum } from "@/components/ui";
-import { BOARDS, PLAYERS, boardValue, type BoardKey } from "@/lib/data";
 import { playerHead } from "@/lib/items";
+import { BOARDS, boardRows, marketItems, live } from "@/lib/read";
 
-import { live } from "@/lib/read";
 export const instant = false;
 
 export function generateStaticParams() {
@@ -16,10 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ board: st
   const { board } = await params;
   const b = BOARDS.find((x) => x.key === board);
   if (!b) return { title: "Board not found" };
-  return {
-    title: `DonutSMP ${b.label} Leaderboard — Top 100`,
-    description: b.desc,
-  };
+  return { title: `DonutSMP ${b.label} — Top Players`, description: b.desc };
 }
 
 export default async function BoardPage({ params }: { params: Promise<{ board: string }> }) {
@@ -28,13 +24,11 @@ export default async function BoardPage({ params }: { params: Promise<{ board: s
   const b = BOARDS.find((x) => x.key === board);
   if (!b) notFound();
 
-  const ranked = PLAYERS.slice()
-    .sort((x, y) => boardValue(y, b.key as BoardKey) - boardValue(x, b.key as BoardKey))
-    .map((p, i) => ({ p, rank: i + 1, value: boardValue(p, b.key as BoardKey) }));
+  const { rows, pending } = boardRows(b.key);
 
   const fmt = (v: number) =>
     b.key === "playtime"
-      ? `${v.toLocaleString()} days`
+      ? `${v.toLocaleString()}d`
       : b.key === "money" || b.key === "shopspend" || b.key === "sellearned"
         ? formatMoney(v)
         : formatNum(v);
@@ -42,39 +36,57 @@ export default async function BoardPage({ params }: { params: Promise<{ board: s
   return (
     <>
       <TopNav />
-      <Ticker items={PLAYERS.slice(0, 8).map((p) => ({ name: p.name, price: p.money, ch: 0 }))} />
+      <Ticker items={marketItems().slice(0, 9).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
 
-      <div className="mx-auto max-w-[1400px] px-5 pt-8">
-        <Breadcrumb trail={[["Leaderboards", "/leaderboards"], [b.label, `/leaderboards/${b.key}`]]} />
+      <div className="mx-auto max-w-[1560px] px-4 pt-8">
+        <Breadcrumb
+          trail={[["Leaderboards", "/leaderboards"], [b.label, `/leaderboards/${b.key}`]]}
+        />
 
-        <PageHead eyebrow={`${PLAYERS.length} tracked · top 100 live`} title={`${b.label} leaderboard`} lede={b.desc} />
+        <PageHead eyebrow={pending ? "Awaiting collector data" : `${rows.length} ranked`}
+          title={b.label} lede={b.desc} />
 
-        {/* Ranked list */}
-        <div className="mt-7 space-y-0" style={{ border: "1px solid var(--line)" }}>
-          {ranked.map(({ p, rank, value }) => (
-            <Link
-              key={p.name}
-              href={`/players/${p.name}`}
-              className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-[var(--surface2)]"
-              style={{ borderBottom: "1px solid var(--line)" }}
-            >
-              <span
-                className="num w-8 shrink-0 text-right text-[13px]"
-                style={{ color: rank <= 3 ? "var(--gold)" : "var(--dim)" }}
+        {pending ? (
+          <div className="mt-10 border p-8" style={{ borderColor: "var(--line)" }}>
+            <div className="badge" style={{ color: "var(--gold)", border: "1px solid var(--line)" }}>
+              No data yet
+            </div>
+            <p className="num mt-4 max-w-[54ch] text-[13px] leading-relaxed" style={{ color: "var(--muted)" }}>
+              This board has no observed values yet. We are not going to fill it with made-up
+              numbers — it fills in the moment the collector reports real stats.
+            </p>
+          </div>
+        ) : (
+          <div className="mt-7 border" style={{ borderColor: "var(--line)" }}>
+            {rows.map(({ p, rank, value }) => (
+              <Link
+                key={p.name}
+                href={`/players/${p.name}`}
+                className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-[var(--surface2)]"
+                style={{ borderBottom: "1px solid var(--line)" }}
               >
-                {rank}
-              </span>
-              <img
-                src={playerHead(p.name, 40)} alt="" width={30} height={30}
-                className="shrink-0 rounded-[2px]" style={{ imageRendering: "pixelated" }}
-              />
-              <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{p.name}</span>
-              <span className="num shrink-0 text-[14px] font-medium">{fmt(value)}</span>
-            </Link>
-          ))}
-        </div>
+                <span
+                  className="num w-8 shrink-0 text-right text-[13px]"
+                  style={{ color: rank <= 3 ? "var(--gold)" : "var(--dim)" }}
+                >
+                  {rank}
+                </span>
+                <img
+                  src={playerHead(p.name, 40)} alt="" width={28} height={28}
+                  className="px shrink-0"
+                />
+                <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{p.name}</span>
+                {b.key === "views" ? (
+                  <span className="num shrink-0 text-[11px]" style={{ color: "var(--dim)" }}>
+                    30d
+                  </span>
+                ) : null}
+                <span className="num shrink-0 text-[14px] font-medium">{fmt(value)}</span>
+              </Link>
+            ))}
+          </div>
+        )}
 
-        {/* Other boards */}
         <div className="mt-12">
           <div className="label mb-3">Other boards</div>
           <div className="flex flex-wrap gap-1.5">
@@ -82,7 +94,7 @@ export default async function BoardPage({ params }: { params: Promise<{ board: s
               <Link
                 key={x.key}
                 href={`/leaderboards/${x.key}`}
-                className="num px-2.5 py-1 text-[12px] transition-colors hover:text-[var(--ink)]"
+                className={x.pending ? "pill num text-[11px] opacity-50" : "pill num text-[11px]"}
                 style={{ color: "var(--muted)", border: "1px solid var(--line)" }}
               >
                 {x.label}

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { Wordmark } from "./logo";
 import { Search } from "./search";
 import { ITEMS } from "@/lib/items";
-import { PLAYERS, MARKET } from "@/lib/data";
+import { MARKET } from "@/lib/data";
+import { PLAYERS } from "@/lib/players";
 
 const SEARCH_ITEMS: [string, string][] = ITEMS.map((i) => [i.slug, i.name]);
 const SEARCH_PLAYERS: [string, string][] = PLAYERS.map((p) => [p.name.toLowerCase(), p.name]);
@@ -127,42 +128,20 @@ function money(n: number) {
   return `$${n.toFixed(0)}`;
 }
 
-// Every destination gets a real Minecraft texture as its marker, so the footer
-// reads as a visual index instead of three columns of grey text.
-const FOOTER_GROUPS: { title: string; links: [string, string, string][] }[] = [
-  {
-    title: "Market",
-    links: [
-      ["diamond", "Prices", "/prices"],
-      ["emerald", "Auction", "/auction"],
-      ["gold_ingot", "Completed sales", "/transactions"],
-      ["netherite_ingot", "Browse all", "/prices/browse"],
-    ],
-  },
-  {
-    title: "Community",
-    links: [
-      ["totem_of_undying", "Leaderboards", "/leaderboards"],
-      ["skeleton_skull", "Player finder", "/players"],
-      ["beacon", "Server status", "/server-status"],
-      ["map", "Regions", "/regions"],
-    ],
-  },
-  {
-    title: "Platform",
-    links: [
-      ["barrel", "Economy", "/stats"],
-      ["crafting_table", "Tools", "/tools"],
-      ["enchanting_table", "API", "/api"],
-      ["nether_star", "Premium", "/premium"],
-    ],
-  },
+// Footer is deliberately short. Twelve grey links across three columns reads as
+// filler; six links with a real texture beside each does not.
+const FOOTER_LINKS: [string, string, string][] = [
+  ["diamond", "Prices", "/prices"],
+  ["emerald", "Auction", "/auction"],
+  ["gold_ingot", "Completed sales", "/transactions"],
+  ["netherite_ingot", "Browse all", "/prices/browse"],
+  ["totem_of_undying", "Leaderboards", "/leaderboards"],
+  ["skeleton_skull", "Players", "/players"],
 ];
 
 export function Footer() {
   return (
     <footer className="relative mt-24 overflow-hidden border-t" style={{ borderColor: "var(--line)" }}>
-      {/* Real block-texture ground running under the footer */}
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-24 opacity-[0.07]"
         style={{
@@ -176,86 +155,37 @@ export function Footer() {
       />
 
       <div className="relative mx-auto max-w-[1560px] px-4 py-14">
-        {/* Brand block */}
-        <div className="grid gap-10 lg:grid-cols-[1fr_2.2fr]">
+        <div className="grid gap-10 sm:grid-cols-[1.2fr_1fr]">
           <div>
             <Wordmark />
-            <p className="num mt-4 max-w-[32ch] text-[11.5px] leading-relaxed" style={{ color: "var(--dim)" }}>
-              Independent community stats for DonutSMP. Collected by our own bot. Not affiliated
-              with the DonutSMP team.
+            <p className="num mt-4 max-w-[34ch] text-[11.5px] leading-relaxed" style={{ color: "var(--dim)" }}>
+              Community stats for DonutSMP. Not affiliated with the DonutSMP team.
             </p>
-            <div className="mt-5 flex gap-1.5">
-              {["diamond", "netherite_ingot", "elytra", "ancient_debris"].map((b) => (
-                <span key={b} className="slot grid h-8 w-8 place-items-center overflow-hidden">
-                  <img src={`/items/${b}.png`} alt="" width={20} height={20} className="px" />
+          </div>
+
+          <nav className="grid grid-cols-2 gap-x-6 gap-y-1 self-start">
+            {FOOTER_LINKS.map(([icon, label, href]) => (
+              <Link key={href} href={href} className="pill group flex items-center gap-2.5 py-1.5">
+                <span className="slot grid h-6 w-6 shrink-0 place-items-center overflow-hidden transition-colors group-hover:border-[var(--gold)]">
+                  <img src={`/items/${icon}.png`} alt="" width={16} height={16} className="px" loading="lazy" />
                 </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Visual link index */}
-          <div className="grid gap-8 sm:grid-cols-3">
-            {FOOTER_GROUPS.map((g) => (
-              <div key={g.title}>
-                <div className="label mb-4">{g.title}</div>
-                <ul className="space-y-1.5">
-                  {g.links.map(([icon, label, href]) => (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        className="pill group flex items-center gap-2.5 py-1 transition-colors"
-                      >
-                        <span className="slot grid h-6 w-6 shrink-0 place-items-center overflow-hidden transition-colors group-hover:border-[var(--gold)]">
-                          <img
-                            src={`/items/${icon}.png`}
-                            alt=""
-                            width={16}
-                            height={16}
-                            className="px"
-                            loading="lazy"
-                          />
-                        </span>
-                        <span
-                          className="text-[12px] transition-colors group-hover:text-[var(--gold)]"
-                          style={{ color: "var(--muted)" }}
-                        >
-                          {label}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                <span className="text-[12px] transition-colors group-hover:text-[var(--gold)]" style={{ color: "var(--muted)" }}>
+                  {label}
+                </span>
+              </Link>
             ))}
-          </div>
-        </div>
-
-        {/* Texture marquee — the footer's closing image */}
-        <div className="mt-12 flex gap-1 overflow-hidden" aria-hidden>
-          {["deepslate", "tuff", "andesite", "granite", "diorite", "calcite",
-            "dripstone_block", "smooth_basalt", "polished_blackstone", "blackstone",
-            "cobbled_deepslate", "polished_deepslate"].map((b, i) => (
-            <img
-              key={i}
-              src={`/items/${b}.png`}
-              alt=""
-              width={26}
-              height={26}
-              className="px shrink-0 opacity-30"
-              loading="lazy"
-            />
-          ))}
+          </nav>
         </div>
 
         <div
-          className="num mt-8 flex flex-col gap-3 border-t pt-5 text-[10.5px] sm:flex-row sm:items-center sm:justify-between"
+          className="num mt-10 flex flex-col gap-3 border-t pt-5 text-[10.5px] sm:flex-row sm:items-center sm:justify-between"
           style={{ borderColor: "var(--line)", color: "var(--dim)" }}
         >
           <span>© 2026 DonutSMP Trader</span>
           <span className="flex gap-5">
+            <Link href="/api" className="transition-colors hover:text-[var(--ink)]">API</Link>
+            <Link href="/stats" className="transition-colors hover:text-[var(--ink)]">Economy</Link>
             <Link href="/about" className="transition-colors hover:text-[var(--ink)]">About</Link>
-            <Link href="/about#privacy" className="transition-colors hover:text-[var(--ink)]">Privacy</Link>
-            <Link href="/about#terms" className="transition-colors hover:text-[var(--ink)]">Terms</Link>
           </span>
         </div>
       </div>

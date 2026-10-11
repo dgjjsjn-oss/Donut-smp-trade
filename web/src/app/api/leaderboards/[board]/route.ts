@@ -1,21 +1,9 @@
 import { NextResponse } from "next/server";
-import { allPlayers } from "@/lib/store";
+import { BOARDS, boardValue } from "@/lib/players";
+import { rankedPlayers } from "@/lib/read";
 import { rateLimit, clientKey } from "@/lib/ratelimit";
 
 export const instant = false;
-
-const BOARDS = {
-  money: "money",
-  kills: "kills",
-  deaths: "deaths",
-  shards: "shards",
-  playtime: "playtimeDays",
-  blocksplaced: "blocksPlaced",
-  blocksbroken: "blocksBroken",
-  mobskilled: "mobsKilled",
-  shopspend: "shopSpend",
-  sellearned: "sellEarned",
-} as const;
 
 export async function GET(
   req: Request,
@@ -29,11 +17,15 @@ export async function GET(
   }
 
   const { board } = await params;
-  const field = BOARDS[board as keyof typeof BOARDS] ?? "money";
+  if (!BOARDS.some((b) => b.key === board)) {
+    return NextResponse.json({ error: "unknown board" }, { status: 404 });
+  }
 
-  const rows = allPlayers()
-    .sort((a, b) => b[field] - a[field])
-    .map((p, i) => ({ rank: i + 1, name: p.name, value: p[field] }));
+  const rows = rankedPlayers()
+    .map((p) => ({ name: p.name, value: boardValue(p, board as never) }))
+    .filter((r): r is { name: string; value: number } => r.value !== null)
+    .sort((a, b) => b.value - a.value)
+    .map((r, i) => ({ rank: i + 1, ...r }));
 
   return NextResponse.json(
     { data: rows, meta: { board, count: rows.length } },

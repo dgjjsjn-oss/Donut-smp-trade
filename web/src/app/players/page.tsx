@@ -1,84 +1,98 @@
 import Link from "next/link";
-
 import { TopNav, Ticker, Footer } from "@/components/layout";
-import { PageHead, PlayerCell, formatMoney } from "@/components/ui";
-import { PLAYERS, BOARDS, boardValue, SERVER } from "@/lib/data";
+import { PageHead, PlayerCell, formatNum } from "@/components/ui";
+import { rankedPlayers, marketItems, live } from "@/lib/read";
 
-import { live } from "@/lib/read";
 export const instant = false;
+
 export const metadata = {
   title: "Player Finder — Search DonutSMP Players",
-  description: "Search DonutSMP players and view money, kills, shards and playtime for any tracked account.",
+  description: "Search tracked DonutSMP accounts by username.",
 };
-export default async function Players({
+
+export default async function PlayersPage({
   searchParams,
-}: { searchParams: Promise<{ q?: string }> }) {
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   await live();
   const sp = await searchParams;
   const q = (sp.q ?? "").trim().toLowerCase();
-  const hits = q ? PLAYERS.filter((p) => p.name.toLowerCase().includes(q)) : PLAYERS;
+
+  const all = rankedPlayers();
+  const hits = q
+    ? all.filter((p) => p.name.toLowerCase().includes(q))
+    : all.slice().sort((a, b) => b.views - a.views);
+
   return (
     <>
       <TopNav />
-      <Ticker items={PLAYERS.slice(0, 8).map((p) => ({ name: p.name, price: p.money, ch: 0 }))} />
-      <div className="mx-auto max-w-[1400px] px-5 pt-10">
+      <Ticker items={marketItems().slice(0, 9).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
+
+      <div className="mx-auto max-w-[1560px] px-4 pt-10">
         <PageHead
-          eyebrow={`${PLAYERS.length} tracked · updated ${SERVER.updatedMinutesAgo}m ago`}
+          eyebrow={`${all.length} tracked`}
           title="Player finder"
-          lede="Search any tracked account."
+          lede="Search by exact username."
         />
+
         <form action="/players" className="mt-6 flex max-w-md gap-2">
           <input
             name="q"
-            defaultValue={q}
-            placeholder="Search a player…"
+            defaultValue={sp.q ?? ""}
+            placeholder="Username"
+            aria-label="Search players"
             className="num flex-1 px-3 py-2.5 text-[13px] outline-none"
             style={{ background: "var(--surface)", border: "1px solid var(--line2)", color: "var(--ink)" }}
           />
           <button
             type="submit"
-            className="num px-4 text-[13px] font-medium transition-transform active:scale-95"
-            style={{ background: "var(--ink)", color: "var(--bg)" }}
+            className="btn px-5 text-[13px] font-medium"
+            style={{ background: "var(--gold)", color: "#0a0b0e" }}
           >
             Search
           </button>
         </form>
-        <div className="mt-8" style={{ border: "1px solid var(--line)" }}>
-          <table className="dense w-full min-w-[860px]">
+
+        <div className="mt-8 border" style={{ borderColor: "var(--line)" }}>
+          <table className="dense w-full">
             <thead>
               <tr>
                 <th>Player</th>
+                <th className="text-right">30d views</th>
                 <th className="text-right">Money</th>
                 <th className="text-right">Kills</th>
                 <th className="text-right">Shards</th>
-                <th className="text-right">Playtime</th>
-                <th className="text-right">Deaths</th>
-                <th className="text-right">Sold</th>
               </tr>
             </thead>
             <tbody>
               {hits.map((p) => (
                 <tr key={p.name}>
                   <td><PlayerCell name={p.name} /></td>
-                  <td className="num text-right font-medium">{formatMoney(p.money)}</td>
-                  <td className="num text-right" style={{ color: "var(--muted)" }}>{p.kills.toLocaleString()}</td>
-                  <td className="num text-right" style={{ color: "var(--muted)" }}>{p.shards.toLocaleString()}</td>
-                  <td className="num text-right" style={{ color: "var(--muted)" }}>{p.playtimeDays}d</td>
-                  <td className="num text-right" style={{ color: "var(--muted)" }}>{p.deaths.toLocaleString()}</td>
-                  <td className="num text-right" style={{ color: "var(--muted)" }}>{formatMoney(p.sellEarned)}</td>
+                  <td className="num text-right" style={{ color: "var(--muted)" }}>
+                    {formatNum(p.views)}
+                  </td>
+                  <td className="num text-right">{formatNum(p.money)}</td>
+                  <td className="num text-right">{formatNum(p.kills)}</td>
+                  <td className="num text-right">{formatNum(p.shards)}</td>
                 </tr>
               ))}
-              {hits.length === 0 && (
+              {hits.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center" style={{ color: "var(--dim)" }}>
+                  <td colSpan={5} className="num py-12 text-center" style={{ color: "var(--dim)" }}>
                     No player matches “{sp.q}”.
                   </td>
                 </tr>
-              )}
+              ) : null}
             </tbody>
           </table>
         </div>
+
+        <p className="num mt-4 text-[10.5px]" style={{ color: "var(--dim)" }}>
+          A dash means no observed value yet. Those cells fill in when the collector reports.
+        </p>
       </div>
+
       <Footer />
     </>
   );

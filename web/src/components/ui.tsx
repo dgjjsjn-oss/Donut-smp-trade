@@ -2,7 +2,8 @@ import Link from "next/link";
 import { playerHead } from "@/lib/items";
 import { ItemIcon } from "@/components/itemicon";
 
-export function formatMoney(n: number): string {
+export function formatMoney(n: number | null): string {
+  if (n === null || n === undefined || !Number.isFinite(n)) return "—";
   const abs = Math.abs(n);
   const sign = n < 0 ? "-" : "";
   if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(2)}T`;
@@ -12,18 +13,21 @@ export function formatMoney(n: number): string {
   return `${sign}$${abs.toFixed(0)}`;
 }
 
-export function formatNum(n: number): string {
+export function formatNum(n: number | null): string {
+  if (n === null || n === undefined || !Number.isFinite(n)) return "—";
   if (n >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
   if (n >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
   if (n >= 1e3) return `${(n / 1e3).toFixed(1)}K`;
   return n.toLocaleString();
 }
 
-export function pct(n: number) {
+export function pct(n: number | null) {
+  if (n === null || n === undefined || !Number.isFinite(n)) return "—";
   return `${n > 0 ? "+" : ""}${n.toFixed(2)}%`;
 }
 
-export function changeColor(n: number) {
+export function changeColor(n: number | null) {
+  if (n === null || n === undefined) return "var(--dim)";
   return n > 0 ? "var(--up)" : n < 0 ? "var(--down)" : "var(--muted)";
 }
 

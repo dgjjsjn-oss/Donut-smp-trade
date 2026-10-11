@@ -1,75 +1,110 @@
 import Link from "next/link";
 import { TopNav, Ticker, Footer } from "@/components/layout";
 import { PageHead, Panel, formatNum } from "@/components/ui";
-import { BOARDS, PLAYERS, SERVER } from "@/lib/data";
 import { playerHead } from "@/lib/items";
+import { BOARDS, PLAYERS, marketItems, live } from "@/lib/read";
 
 export const instant = false;
 
 export const metadata = {
-  title: "DonutSMP Leaderboards — Money, Kills, Playtime & More",
+  title: "DonutSMP Leaderboards — Most Looked Up, Money, Kills",
   description:
-    "Top DonutSMP players by money, kills, deaths, shards, playtime, blocks placed and broken, mobs killed, shop spend and sell earnings.",
+    "DonutSMP player leaderboards. Real 30-day profile views, plus money, kills, shards and playtime as the collector reports them.",
 };
 
-export default function Leaderboards() {
+export default async function Leaderboards() {
+  await live();
+
+  const top = PLAYERS.slice()
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 12);
+
+  const pendingBoards = BOARDS.filter((b) => b.pending);
+
   return (
     <>
       <TopNav />
-      <Ticker items={PLAYERS.slice(0, 8).map((p) => ({ name: p.name, price: p.money, ch: 0 }))} />
+      <Ticker items={marketItems().slice(0, 9).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
 
-      <div className="mx-auto max-w-[1400px] px-5 pt-10">
+      <div className="mx-auto max-w-[1560px] px-4 pt-10">
         <PageHead
-          eyebrow={`updated ${SERVER.updatedMinutesAgo}m ago`}
+          eyebrow={`${PLAYERS.length} tracked accounts`}
           title="Leaderboards"
-          lede="Ten ways to rank the server."
+          lede="One board has observed data. The rest fill in as the collector reports."
         />
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {BOARDS.map((b) => (
-            <Link
-              key={b.key}
-              href={`/leaderboards/${b.key}`}
-              className="group rounded-lg p-px transition-transform duration-200 active:scale-[0.99]"
-              style={{ background: "var(--line)" }}
-            >
-              <div className="h-full rounded-[7px] p-5 transition-colors group-hover:bg-[var(--surface2)]">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-[15px] font-medium transition-colors group-hover:text-[var(--gold)]">
-                    {b.label}
+        <div className="mt-8 grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+          {/* Real data */}
+          <div>
+            <div className="compartment pt-3">
+              <span className="label" style={{ color: "var(--gold)" }}>
+                [ Most looked up · 30 days ]
+              </span>
+            </div>
+            <div className="mt-3 border" style={{ borderColor: "var(--line)" }}>
+              {top.map((p, i) => (
+                <Link
+                  key={p.name}
+                  href={`/players/${p.name}`}
+                  className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-[var(--surface2)]"
+                  style={{ borderBottom: "1px solid var(--line)" }}
+                >
+                  <span className="num w-7 shrink-0 text-right text-[12px]" style={{ color: "var(--dim)" }}>
+                    {i + 1}
                   </span>
-                  <span className="num text-[11px]" style={{ color: "var(--dim)" }}>
-                    top 100
+                  <img src={playerHead(p.name, 40)} alt="" width={24} height={24} className="px shrink-0" />
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{p.name}</span>
+                  {p.featured ? (
+                    <span className="badge" style={{ color: "var(--gold)", border: "1px solid var(--line)" }}>
+                      Featured
+                    </span>
+                  ) : null}
+                  <span className="num w-16 shrink-0 text-right text-[12px] text-[var(--muted)]">
+                    {formatNum(p.views)}
                   </span>
-                </div>
-                <p className="mt-2 text-[12.5px] leading-relaxed" style={{ color: "var(--muted)" }}>
-                  {b.desc}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        <Panel className="mt-10">
-          <div className="label mb-4">Current top 5 by money</div>
-          <div className="grid gap-4 sm:grid-cols-5">
-            {PLAYERS.slice(0, 5).map((p, i) => (
-              <Link key={p.name} href={`/players/${p.name}`} className="min-w-0">
-                <img
-                  src={playerHead(p.name, 80)}
-                  alt="" width={1000} height={220}
-                  className="w-full rounded"
-                  style={{ imageRendering: "pixelated" }}
-                />
-                <div className="num mt-2 text-[11px]" style={{ color: "var(--dim)" }}>#{i + 1}</div>
-                <div className="truncate text-[13px] font-medium">{p.name}</div>
-                <div className="num text-[12px]" style={{ color: "var(--muted)" }}>
-                  {formatNum(p.money)}
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </Panel>
+
+          {/* Pending boards, honest */}
+          <div>
+            <div className="compartment pt-3">
+              <span className="label" style={{ color: "var(--dim)" }}>[ Awaiting collector ]</span>
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {pendingBoards.map((b) => (
+                <Link
+                  key={b.key}
+                  href={`/leaderboards/${b.key}`}
+                  className="group border p-3 transition-colors hover:border-[var(--line2)]"
+                  style={{ borderColor: "var(--line)" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] transition-colors group-hover:text-[var(--gold)]">
+                      {b.label}
+                    </span>
+                    <span className="num text-[10px]" style={{ color: "var(--dim)" }}>
+                      —
+                    </span>
+                  </div>
+                  <div className="num mt-1 text-[10px]" style={{ color: "var(--dim)" }}>
+                    no data yet
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <Panel className="mt-4">
+              <div className="label mb-3">Why some boards are empty</div>
+              <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--muted)" }}>
+                Balances, kills and playtime require a live connection to the server. We would
+                rather show an honest blank than a plausible fake — a trader cannot tell a
+                fabricated balance from a real one at a glance, and will trade on it.
+              </p>
+            </Panel>
+          </div>
+        </div>
       </div>
 
       <Footer />

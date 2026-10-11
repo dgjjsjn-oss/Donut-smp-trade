@@ -59,7 +59,7 @@ export default async function Auction({
                 <tr key={l.id}>
                   <td><ItemCell slug={l.slug} name={l.name} material={l.material} /></td>
                   <td>
-                    <Link href={`/rankedPlayers()/${l.seller}`} className="flex items-center gap-2">
+                    <Link href={`/players/${l.seller}`} className="flex items-center gap-2">
                       <img src={playerHead(l.seller, 40)} alt="" width={20} height={20}
                         className="rounded-[2px]" style={{ imageRendering: "pixelated" }} />
                       <span className="text-[12.5px]" style={{ color: "var(--muted)" }}>{l.seller}</span>
@@ -96,8 +96,8 @@ export default async function Auction({
   );
 }
 function buildListings(items: MarketRow[]) {
-  const sellers = ["jesticc", "rtkprime", "Ehxy", "BabyBeetroot", "DonutUnc", "Jeadox",
-    "ClownPierce", "Vitalasy", "iditity", "rekrapp2", "DrDonutt", "Marlowww"];
+  const sellers = ["jesticc", "rtkprime", "Ehxy", "DonutUnc", "Jeadox",
+  "iditity", "LoadFc", "cruell", "BabyBeetroot", "AidansGamingYT", "RTKprime", "Squintom"];
   const out: {
     id: string; slug: string; name: string; material: string;
     seller: string; stack: number; price: number; diff: number;

@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { ITEMS } from "@/lib/items";
-import { PLAYERS, MARKET } from "@/lib/data";
+import { MARKET } from "@/lib/data";
+import { PLAYERS } from "@/lib/players";
 
 const BASE = process.env.SITE_URL ?? "https://donut-smp-trade.onrender.com";
 
