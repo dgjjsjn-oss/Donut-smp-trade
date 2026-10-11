@@ -187,6 +187,15 @@ img.px { image-rendering: pixelated; }
 
 a { color: inherit; text-decoration: none; }
 
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+.focus\:not-sr-only:focus { position: static; width: auto; height: auto; clip: auto; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
 button { cursor: pointer; }
 
 /* Dense data table */

@@ -53,7 +53,7 @@ export function ItemCell({ slug, name, material, sub }: {
 export function PlayerCell({ name, sub }: { name: string; sub?: string }) {
   return (
     <Link href={`/players/${name}`} className="group flex min-w-0 items-center gap-2.5">
-      <img src={playerHead(name, 40)} alt="" width={22} height={22} className="px shrink-0" />
+      <img src={playerHead(name, 40)} alt={`${name} player head`} width={22} height={22} className="px shrink-0" loading="lazy" />
       <span className="min-w-0">
         <span className="row-ref block truncate text-[12.5px] font-medium">{name}</span>
         {sub ? <span className="num block text-[10px]" style={{ color: "var(--dim)" }}>{sub}</span> : null}

@@ -1,4 +1,6 @@
+"use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Wordmark } from "./logo";
 import { Search } from "./search";
 import { ITEMS } from "@/lib/items";
@@ -24,6 +26,10 @@ const NAV: [string, string, string][] = [
 ];
 
 export function TopNav() {
+  const path = usePathname();
+  const isActive = (href: string) =>
+    href === "/" ? path === "/" : path === href || path.startsWith(`${href}/`);
+
   return (
     <header className="sticky top-0 z-40 border-b" style={{ background: "var(--bg)" }}>
       <div className="mx-auto flex h-12 max-w-[1560px] items-center gap-5 px-4">
@@ -34,7 +40,7 @@ export function TopNav() {
             <Link
               key={href}
               href={href}
-              className="pill group flex items-center gap-1.5 py-1 transition-colors"
+              className={isActive(href) ? "pill group flex items-center gap-1.5 py-1" : "pill group flex items-center gap-1.5 py-1"}
               title={label}
             >
               <img
@@ -46,7 +52,7 @@ export function TopNav() {
               />
               <span
                 className="num text-[11px] uppercase tracking-[0.08em] transition-colors group-hover:text-[var(--gold)]"
-                style={{ color: "var(--muted)" }}
+                style={{ color: isActive(href) ? "var(--gold)" : "var(--muted)" }}
               >
                 {label}
               </span>

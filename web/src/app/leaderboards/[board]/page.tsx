@@ -72,7 +72,7 @@ export default async function BoardPage({ params }: { params: Promise<{ board: s
                   {rank}
                 </span>
                 <img
-                  src={playerHead(p.name, 40)} alt="" width={28} height={28}
+                  src={playerHead(p.name, 40)} alt={`${p.name} player head`} width={28} height={28}
                   className="px shrink-0"
                 />
                 <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{p.name}</span>

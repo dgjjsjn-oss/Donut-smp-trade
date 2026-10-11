@@ -52,7 +52,7 @@ export default async function Leaderboards() {
                   <span className="num w-7 shrink-0 text-right text-[12px]" style={{ color: "var(--dim)" }}>
                     {i + 1}
                   </span>
-                  <img src={playerHead(p.name, 40)} alt="" width={24} height={24} className="px shrink-0" />
+                  <img src={playerHead(p.name, 40)} alt={`${p.name} player head`} width={24} height={24} className="px shrink-0" loading="lazy" />
                   <span className="min-w-0 flex-1 truncate text-[13px] font-medium">{p.name}</span>
                   {p.featured ? (
                     <span className="badge" style={{ color: "var(--gold)", border: "1px solid var(--line)" }}>
