@@ -95,6 +95,8 @@ export function ingest(payload: unknown): IngestResult {
         slug: id,
         name: typeof row.name === "string" ? row.name : prev?.name ?? titleize(id),
         material: typeof row.material === "string" ? row.material : id,
+        symbol: typeof row.symbol === "string" ? row.symbol : id.slice(0, 4).toUpperCase(),
+        ch1h: typeof row.ch1h === "number" ? row.ch1h : 0,
         price: row.price as number,
         ch24h: typeof row.ch24h === "number" ? row.ch24h : prev?.ch24h ?? 0,
         ch7d: typeof row.ch7d === "number" ? row.ch7d : prev?.ch7d ?? 0,
@@ -130,6 +132,9 @@ export function ingest(payload: unknown): IngestResult {
       d.players.set(name.toLowerCase(), {
         name: prev?.name ?? name,
         money: row.money,
+        ch24h: typeof row.ch24h === "number" ? row.ch24h : (prev?.ch24h ?? 0),
+        online: prev?.online ?? true,
+        seen: prev?.seen ?? "now",
         kills: typeof row.kills === "number" ? row.kills : prev?.kills ?? 0,
         deaths: typeof row.deaths === "number" ? row.deaths : prev?.deaths ?? 0,
         shards: typeof row.shards === "number" ? row.shards : prev?.shards ?? 0,

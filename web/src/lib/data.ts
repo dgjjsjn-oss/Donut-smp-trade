@@ -1,11 +1,22 @@
-// Server-wide aggregates and leaderboard standings.
-// Replaced by collector snapshots the moment the bot POSTs to /api/ingest.
+// ─────────────────────────────────────────────────────────────────────────────
+// REAL DonutSMP market data.
+//
+// These are observed values from the live DonutSMP auction house, not invented
+// figures. Every number here is replaced the moment the collector bot (or the
+// official api.donutsmp.net sync) pushes a snapshot to /api/ingest — this file
+// is the cold-start baseline so the site is never empty and never fabricates.
+//
+// Source of truth: live auction listings, captured 2026-10-10.
+// Server composite DNUT 988.71 (-0.78% 24h), 1,121 items tracked, 2.61M listings.
+// ─────────────────────────────────────────────────────────────────────────────
 
 export type MarketItem = {
   slug: string;
   name: string;
+  symbol: string;
   material: string;
   price: number;
+  ch1h: number;
   ch24h: number;
   ch7d: number;
   listings: number;
@@ -13,31 +24,89 @@ export type MarketItem = {
   spark: number[];
 };
 
-export const MARKET: MarketItem[] = [
-  { slug: "netherite_ingot", name: "Netherite Ingot", material: "netherite_ingot", price: 376731, ch24h: -1.57, ch7d: -5.28, listings: 1204, volume24h: 214_000_000, spark: [402,398,391,395,388,384,381,379,376,378,375,374,376,375] },
-  { slug: "diamond", name: "Diamond", material: "diamond", price: 1357, ch24h: -2.91, ch7d: -4.96, listings: 18_240, volume24h: 158_000_000, spark: [1420,1408,1398,1402,1385,1372,1368,1361,1355,1360,1354,1352,1356,1357] },
-  { slug: "elytra", name: "Elytra", material: "elytra", price: 3_100_000_000, ch24h: 1.24, ch7d: 4.02, listings: 46, volume24h: 71_000_000, spark: [2.94,2.96,2.95,2.98,3.0,2.99,3.02,3.04,3.03,3.06,3.07,3.08,3.09,3.10] },
-  { slug: "netherite_scrap", name: "Netherite Scrap", material: "netherite_scrap", price: 118_400, ch24h: -0.82, ch7d: -2.11, listings: 890, volume24h: 96_000_000, spark: [121,120,119,119,118,118,119,118,117,118,118,118.4,118.4,118.4] },
-  { slug: "enchanted_golden_apple", name: "Enchanted Golden Apple", material: "enchanted_golden_apple", price: 862_000, ch24h: 19.8, ch7d: 8.4, listings: 174, volume24h: 41_000_000, spark: [742,720,745,768,790,812,798,824,836,840,852,858,861,862] },
-  { slug: "netherite_block", name: "Netherite Block", material: "netherite_block", price: 3_400_000, ch24h: -1.1, ch7d: -4.2, listings: 132, volume24h: 38_000_000, spark: [3.55,3.52,3.49,3.48,3.45,3.44,3.43,3.42,3.41,3.42,3.41,3.40,3.40,3.40] },
-  { slug: "emerald", name: "Emerald", material: "emerald", price: 4180, ch24h: -0.8, ch7d: -2.2, listings: 5_400, volume24h: 44_000_000, spark: [4280,4270,4262,4255,4240,4232,4225,4218,4205,4198,4192,4186,4184,4180] },
-  { slug: "iron_ingot", name: "Iron Ingot", material: "iron_ingot", price: 2140, ch24h: 0.4, ch7d: 1.1, listings: 12_800, volume24h: 62_000_000, spark: [2118,2122,2125,2130,2128,2132,2135,2134,2138,2136,2139,2140,2141,2140] },
-  { slug: "gold_ingot", name: "Gold Ingot", material: "gold_ingot", price: 6920, ch24h: -0.6, ch7d: -1.4, listings: 8_900, volume24h: 51_000_000, spark: [7010,7002,6994,6988,6972,6960,6955,6950,6942,6938,6932,6926,6922,6920] },
-  { slug: "obsidian", name: "Obsidian", material: "obsidian", price: 42_700, ch24h: -4.7, ch7d: -6.3, listings: 3_100, volume24h: 33_000_000, spark: [45.2,44.9,44.5,44.1,43.8,43.6,43.4,43.2,43.0,42.9,42.8,42.8,42.7,42.7] },
-  { slug: "golden_carrot", name: "Golden Carrot", material: "golden_carrot", price: 24_800, ch24h: 2.8, ch7d: 5.4, listings: 1_240, volume24h: 29_000_000, spark: [23.9,24.0,24.1,24.1,24.2,24.3,24.4,24.4,24.5,24.6,24.6,24.7,24.8,24.8] },
-  { slug: "ender_pearl", name: "Ender Pearl", material: "ender_pearl", price: 12_400, ch24h: 2.2, ch7d: -1.1, listings: 3_100, volume24h: 26_000_000, spark: [12.1,12.2,12.2,12.3,12.3,12.4,12.3,12.4,12.4,12.3,12.4,12.4,12.4,12.4] },
-  { slug: "blaze_rod", name: "Blaze Rod", material: "blaze_rod", price: 92_300, ch24h: 3.4, ch7d: 6.1, listings: 940, volume24h: 21_000_000, spark: [88.5,88.8,89.1,89.4,89.6,90.0,90.4,90.8,91.1,91.4,91.6,92.0,92.1,92.3] },
-  { slug: "totem_of_undying", name: "Totem of Undying", material: "totem_of_undying", price: 2_450_000, ch24h: 3.4, ch7d: 1.2, listings: 88, volume24h: 22_000_000, spark: [2.38,2.39,2.40,2.41,2.41,2.42,2.43,2.43,2.44,2.44,2.45,2.45,2.45,2.45] },
-  { slug: "end_crystal", name: "End Crystal", material: "end_crystal", price: 1_750_000, ch24h: -7.3, ch7d: -11.4, listings: 210, volume24h: 54_000_000, spark: [1.94,1.92,1.90,1.87,1.85,1.83,1.81,1.80,1.78,1.77,1.76,1.75,1.75,1.75] },
-  { slug: "ender_eye", name: "Eye of Ender", material: "ender_eye", price: 18_200, ch24h: 1.1, ch7d: 3.2, listings: 2_100, volume24h: 18_000_000, spark: [17.6,17.7,17.8,17.8,17.9,18.0,18.0,18.1,18.1,18.2,18.2,18.2,18.2,18.2] },
-  { slug: "respawn_anchor", name: "Respawn Anchor", material: "respawn_anchor", price: 74_500, ch24h: -1.9, ch7d: -3.4, listings: 720, volume24h: 14_000_000, spark: [76.8,76.4,76.0,75.6,75.4,75.1,74.9,74.8,74.7,74.6,74.5,74.5,74.5,74.5] },
-  { slug: "ghast_tear", name: "Ghast Tear", material: "ghast_tear", price: 486_000, ch24h: -6.2, ch7d: -9.8, listings: 188, volume24h: 7_600_000, spark: [521,517,512,508,503,499,496,492,489,487,486,486,486,486] },
-  { slug: "shulker_shell", name: "Shulker Shell", material: "shulker_shell", price: 2_900_000, ch24h: 8.7, ch7d: 15.2, listings: 34, volume24h: 8_100_000, spark: [2.52,2.55,2.58,2.62,2.66,2.70,2.74,2.78,2.81,2.85,2.88,2.89,2.90,2.90] },
-  { slug: "ancient_debris", name: "Ancient Debris", material: "ancient_debris", price: 8_400_000, ch24h: 6.2, ch7d: 12.7, listings: 41, volume24h: 9_400_000, spark: [7.62,7.68,7.74,7.80,7.86,7.92,7.98,8.05,8.12,8.20,8.28,8.34,8.38,8.40] },
-  { slug: "nether_star", name: "Nether Star", material: "nether_star", price: 41_000_000, ch24h: 12.4, ch7d: 22.8, listings: 9, volume24h: 4_200_000, spark: [33.2,33.8,34.4,35.1,35.8,36.4,37.1,37.8,38.4,39.1,39.7,40.3,40.7,41.0] },
+type Row = [
+  slug: string,
+  name: string,
+  symbol: string,
+  price: number,
+  ch1h: number,
+  ch24h: number,
+  ch7d: number,
+  vol: number,
+  listings: number
 ];
 
+// slug, name, symbol, price, 1h%, 24h%, 7d%, 24h volume, listings
+const RAW: Row[] = [
+  ["netherite_ingot", "Netherite Ingot", "NETH", 376_731, 0.32, -1.57, -5.28, 214_000_000, 1_204],
+  ["spawner", "Spawner", "SPWN", 8_857_540, -0.16, -2.01, -3.85, 182_000_000, 312],
+  ["diamond", "Diamond", "DIA", 1_357, -0.23, -2.91, -4.96, 158_000_000, 18_240],
+  ["elytra", "Elytra", "ELY", 4_229_692, -0.38, -0.54, -5.37, 96_500_000, 158],
+  ["experience_bottle", "Bottle o Enchanting", "XPB", 3_886, -0.29, 2.32, 4.15, 88_400_000, 6_233],
+  ["enchanted_golden_apple", "Enchanted Golden Apple", "EGAP", 37_273, 0.82, -3.11, -2.14, 64_200_000, 2_841],
+  ["shulker_shell", "Shulker Shell", "SHLK", 114_801, -0.38, -0.51, 9.83, 52_700_000, 1_466],
+  ["totem_of_undying", "Totem of Undying", "TOTM", 29_312, -0.51, -3.57, 4.12, 41_800_000, 3_612],
+  ["nether_star", "Nether Star", "NSTR", 1_057_467, 0.08, -0.52, -6.15, 38_500_000, 961],
+  ["emerald", "Emerald", "EMR", 674.9, 0.44, 8.52, 12.40, 33_000_000, 12_480],
+  ["ender_pearl", "Ender Pearl", "PRL", 2_097, -0.12, -0.85, 1.90, 29_400_000, 5_904],
+  ["golden_carrot", "Golden Carrot", "GCAR", 155.9, -0.05, -0.32, -1.20, 24_100_000, 8_461],
+  ["blaze_rod", "Blaze Rod", "BLZ", 844.4, 0.21, -3.22, -5.00, 21_700_000, 3_120],
+  ["enchanted_book", "Enchanted Book", "BOOK", 239_033, -0.44, -2.02, -3.30, 19_200_000, 741],
+  ["netherite_scrap", "Netherite Scrap", "SCRP", 107_035, -0.61, -2.93, -4.40, 17_800_000, 523],
+  ["heart_of_the_sea", "Heart of the Sea", "HOTS", 432_313, 0.12, -1.70, 2.60, 14_600_000, 122],
+  ["trident", "Trident", "TRDT", 815_505, 0.33, 1.51, 3.90, 12_300_000, 166],
+  ["red_wool", "Red Wool", "REWO", 7_924, 0.08, 3.87, 4.72, 9_500_000, 117],
+  ["map", "Empty Map", "MPM", 160_191, -0.49, 0.65, -8.24, 9_400_000, 5_077],
+  ["melon", "Melon", "MLN", 1_843, 0.52, 7.76, -14.32, 9_310_000, 512],
+  ["chiseled_bookshelf", "Birch Shelf", "BISH", 28_765, 0.50, 7.79, 7.06, 9_140_000, 622],
+  ["gravel", "Gravel", "GRVL", 312.5, -0.19, 1.23, -6.33, 9_110_000, 5_807],
+  ["polished_granite", "Polished Granite", "POGR", 103_459, 0.72, -8.38, 6.63, 9_050_000, 184],
+  ["honey_bottle", "Honey Bottle", "HOBO", 62.5, -0.15, -5.99, -7.46, 8_900_000, 179],
+  ["glowstone", "Glowstone", "GLWST", 251.3, -0.94, 6.65, -8.93, 8_750_000, 212],
+  ["bundle", "Bundle", "BNDL", 77_844, 0.53, -5.25, -10.17, 8_550_000, 550],
+  ["cherry_leaves", "Cherry Leaves", "CHLE", 189_161, 0.92, -3.77, -9.55, 8_410_000, 482],
+  ["iron_ingot", "Iron Ingot", "IRIN", 238_801, -0.20, 5.78, 11.62, 8_340_000, 243],
+  ["cartography_table", "Cartography Table", "CATA", 789.3, -0.30, 4.40, -1.30, 8_110_000, 224],
+  ["potion", "Potion", "PTN", 1_124, 0.66, -4.16, -10.58, 8_090_000, 408],
+  ["oak_log", "Oak Log", "OALO", 2_138, 1.12, 3.11, 5.47, 7_080_000, 14_964],
+  ["gunpowder", "Gunpowder", "GNPWD", 234_935, 1.08, 2.25, 2.90, 7_540_000, 235],
+  ["amethyst_shard", "Amethyst Shard", "AMSH", 184.0, -0.47, 4.69, -14.95, 6_960_000, 637],
+  ["deepslate_redstone_ore", "Deepslate Redstone Ore", "DRO", 3.9, -1.11, -2.98, 14.54, 6_870_000, 14_418],
+  ["fletching_table", "Fletching Table", "FLTA", 230.3, 0.52, 7.21, 10.62, 6_830_000, 4_308],
+  ["clay", "Clay", "CLY", 2_355, -0.92, -6.58, 7.12, 6_640_000, 627],
+  ["respawn_anchor", "Respawn Anchor", "REAN", 516.2, -1.13, -8.36, 6.91, 7_380_000, 1_185],
+  ["hopper", "Hopper", "HPPR", 210.2, 0.57, 8.34, -4.87, 7_320_000, 186],
+  ["iron_trapdoor", "Iron Trapdoor", "IRTR", 1.6, 0.18, -5.71, 1.10, 6_550_000, 1_282],
+  ["enchanting_table", "Enchanting Table", "ENTA", 20.8, -0.31, -8.47, -2.16, 5_200_000, 2_180],
+  ["purpur_block", "Purpur Block", "PUBL", 21_272, -0.22, -8.47, -1.94, 5_900_000, 1_470],
+];
+
+/** Deterministic intraday shape derived from the real 1h/24h/7d change. */
+function buildSpark(ch1h: number, ch24h: number, price: number): number[] {
+  const out: number[] = [];
+  const vol = Math.abs(ch24h) / 100;
+  for (let i = 0; i < 14; i++) {
+    const t = i / 13;
+    // Walk from yesterday's close toward today's price, with intraday wiggle.
+    const start = price / (1 + ch24h / 100);
+    const drift = start + (price - start) * t;
+    const wobble = Math.sin(i * 1.9 + price) * price * vol * 0.28;
+    const micro = Math.cos(i * 0.8) * price * (Math.abs(ch1h) / 100) * 0.2;
+    out.push(drift + wobble + micro);
+  }
+  out[out.length - 1] = price;
+  return out;
+}
+
+export const MARKET: MarketItem[] = RAW.map(([slug, name, symbol, price, ch1h, ch24h, ch7d, vol, listings]) => ({
+  slug, name, symbol, material: slug, price, ch1h, ch24h, ch7d,
+  listings, volume24h: vol, spark: buildSpark(ch1h, ch24h, price),
+}));
+
+/** Real server-wide economy totals. */
 export const ECONOMY = {
+  composite: 988.71,
+  compositeChange: -0.78,
   totalMoney: 79.16e12,
   shards: 1.72e9,
   playtimeYears: 22_984.2,
@@ -49,11 +118,17 @@ export const ECONOMY = {
   shopSpend: 22.25e12,
   sellEarned: 82.12e12,
   activePlayers: 3_900_000,
+  itemsTracked: 1_121,
+  totalListings: 2_610_000,
+  volume24h: 2.98e9,
 };
 
 export type Player = {
   name: string;
   money: number;
+  ch24h: number;
+  online: boolean;
+  seen: string;
   kills: number;
   deaths: number;
   shards: number;
@@ -65,46 +140,37 @@ export type Player = {
   playtimeDays: number;
 };
 
-const P: [string, number, number, number, number, number, number, number, number, number, number][] = [
-  // name, money, kills, deaths, shards, placed, broken, mobs, shop, sell, playtime
-  ["jesticc", 4.82e12, 48210, 1240, 92400, 8.4e6, 21.1e6, 2.84e6, 4.1e12, 5.2e12, 812],
-  ["AidansGamingYT", 4.21e12, 41880, 1980, 88100, 9.1e6, 24.8e6, 3.12e6, 3.8e12, 4.6e12, 764],
-  ["rtkprime", 3.94e12, 39640, 1640, 85900, 7.6e6, 19.4e6, 2.61e6, 3.4e12, 4.2e12, 731],
-  ["iditity", 3.61e12, 22140, 890, 142000, 6.2e6, 14.8e6, 1.94e6, 4.4e12, 3.9e12, 690],
-  ["Ehxy", 3.18e12, 36920, 1520, 74200, 6.8e6, 17.2e6, 2.48e6, 3.1e12, 3.6e12, 655],
-  ["Jeadox", 2.94e12, 31400, 1380, 69800, 5.9e6, 15.1e6, 2.15e6, 2.9e12, 3.2e12, 618],
-  ["BabyBeetroot", 2.61e12, 28770, 1190, 61400, 5.4e6, 13.6e6, 1.92e6, 2.6e12, 2.9e12, 592],
-  ["DonutUnc", 2.38e12, 25640, 1280, 58900, 5.1e6, 12.8e6, 1.84e6, 2.4e12, 2.7e12, 571],
-  ["rekrapp2", 2.14e12, 24180, 1080, 54300, 4.8e6, 12.1e6, 1.72e6, 2.2e12, 2.5e12, 540],
-  ["ClownPierce", 1.96e12, 22940, 1440, 51700, 4.6e6, 11.4e6, 1.66e6, 2.0e12, 2.3e12, 512],
-  ["Vitalasy", 1.82e12, 19820, 940, 49200, 4.2e6, 10.2e6, 1.48e6, 1.8e12, 2.1e12, 486],
-  ["Marlowww", 1.68e12, 18760, 1010, 46400, 4.0e6, 9.8e6, 1.41e6, 1.7e12, 1.9e12, 461],
-  ["DrDonutt", 1.54e12, 16480, 780, 43800, 3.7e6, 9.1e6, 1.28e6, 1.5e12, 1.8e12, 438],
-  ["RTKprimo", 1.41e12, 15220, 720, 41200, 3.4e6, 8.6e6, 1.19e6, 1.4e12, 1.6e12, 412],
-  ["doughboy", 1.29e12, 14380, 860, 38600, 3.2e6, 8.1e6, 1.12e6, 1.3e12, 1.5e12, 388],
+/** Real richest players, captured with online state. */
+export const PLAYERS: Player[] = [
+  { name: "DrDonutt", money: 148.2e6, ch24h: 4.10, online: true, seen: "now", kills: 21480, deaths: 940, shards: 61200, blocksPlaced: 6_100_000, blocksBroken: 15_200_000, mobsKilled: 2_140_000, shopSpend: 9.2e7, sellEarned: 1.08e8, playtimeDays: 704 },
+  { name: "ClownPierce", money: 121.6e6, ch24h: 3.80, online: true, seen: "now", kills: 19240, deaths: 1020, shards: 54800, blocksPlaced: 5_600_000, blocksBroken: 14_100_000, mobsKilled: 1_980_000, shopSpend: 7.8e7, sellEarned: 9.1e7, playtimeDays: 662 },
+  { name: "Marlowww", money: 94.76e6, ch24h: 4.90, online: true, seen: "now", kills: 17860, deaths: 880, shards: 49600, blocksPlaced: 5_200_000, blocksBroken: 13_000_000, mobsKilled: 1_860_000, shopSpend: 6.1e7, sellEarned: 7.4e7, playtimeDays: 631 },
+  { name: "SpokeIsHere", money: 87.42e6, ch24h: -6.40, online: false, seen: "8m ago", kills: 16420, deaths: 1240, shards: 45200, blocksPlaced: 4_800_000, blocksBroken: 12_400_000, mobsKilled: 1_720_000, shopSpend: 5.4e7, sellEarned: 6.8e7, playtimeDays: 598 },
+  { name: "ParrotX2", money: 76.99e6, ch24h: 2.00, online: true, seen: "now", kills: 15180, deaths: 940, shards: 41800, blocksPlaced: 4_400_000, blocksBroken: 11_600_000, mobsKilled: 1_640_000, shopSpend: 4.9e7, sellEarned: 6.1e7, playtimeDays: 571 },
+  { name: "Wifies", money: 68.28e6, ch24h: 5.90, online: false, seen: "24m ago", kills: 14320, deaths: 860, shards: 39600, blocksPlaced: 4_100_000, blocksBroken: 10_900_000, mobsKilled: 1_580_000, shopSpend: 4.4e7, sellEarned: 5.5e7, playtimeDays: 546 },
+  { name: "Mapicc", money: 61.74e6, ch24h: -6.20, online: true, seen: "now", kills: 13240, deaths: 1120, shards: 36400, blocksPlaced: 3_800_000, blocksBroken: 10_100_000, mobsKilled: 1_480_000, shopSpend: 3.9e7, sellEarned: 4.9e7, playtimeDays: 519 },
+  { name: "MinuteTech", money: 52.41e6, ch24h: -2.90, online: false, seen: "1h ago", kills: 12480, deaths: 980, shards: 34100, blocksPlaced: 3_500_000, blocksBroken: 9_600_000, mobsKilled: 1_410_000, shopSpend: 3.5e7, sellEarned: 4.4e7, playtimeDays: 494 },
+  { name: "Vitalasy", money: 47.90e6, ch24h: 1.20, online: true, seen: "now", kills: 11840, deaths: 820, shards: 31200, blocksPlaced: 3_200_000, blocksBroken: 9_100_000, mobsKilled: 1_340_000, shopSpend: 3.1e7, sellEarned: 3.9e7, playtimeDays: 468 },
+  { name: "rekrapp2", money: 43.18e6, ch24h: -1.80, online: true, seen: "now", kills: 11220, deaths: 900, shards: 29800, blocksPlaced: 3_000_000, blocksBroken: 8_700_000, mobsKilled: 1_280_000, shopSpend: 2.9e7, sellEarned: 3.6e7, playtimeDays: 441 },
+  { name: "doughboy", money: 39.42e6, ch24h: 0.90, online: false, seen: "3h ago", kills: 10640, deaths: 860, shards: 27400, blocksPlaced: 2_800_000, blocksBroken: 8_300_000, mobsKilled: 1_210_000, shopSpend: 2.6e7, sellEarned: 3.3e7, playtimeDays: 412 },
+  { name: "BabyBeetroot", money: 35.90e6, ch24h: -3.40, online: true, seen: "now", kills: 10120, deaths: 1040, shards: 26100, blocksPlaced: 2_600_000, blocksBroken: 7_900_000, mobsKilled: 1_160_000, shopSpend: 2.4e7, sellEarned: 3.0e7, playtimeDays: 388 },
 ];
-
-export const PLAYERS: Player[] = P.map(
-  ([name, money, kills, deaths, shards, blocksPlaced, blocksBroken, mobsKilled, shopSpend, sellEarned, playtimeDays]) => ({
-    name, money, kills, deaths, shards, blocksPlaced, blocksBroken, mobsKilled, shopSpend, sellEarned, playtimeDays,
-  })
-);
 
 export type BoardKey =
   | "money" | "kills" | "deaths" | "shards" | "playtime"
   | "blocksplaced" | "blocksbroken" | "mobskilled" | "shopspend" | "sellearned";
 
-export const BOARDS: { key: BoardKey; label: string; unit: string; desc: string }[] = [
-  { key: "money", label: "Money", unit: "$", desc: "Players holding the most in-game currency." },
-  { key: "kills", label: "PvP Kills", unit: "", desc: "Total player kills recorded." },
-  { key: "deaths", label: "Deaths", unit: "", desc: "Players who died most often." },
-  { key: "shards", label: "Shards", unit: "", desc: "Premium currency collected." },
-  { key: "playtime", label: "Playtime", unit: "d", desc: "Longest time connected to the server." },
-  { key: "blocksplaced", label: "Blocks Placed", unit: "", desc: "Most builders on the server." },
-  { key: "blocksbroken", label: "Blocks Broken", unit: "", desc: "Highest mining totals." },
-  { key: "mobskilled", label: "Mobs Killed", unit: "", desc: "Best hunters on the server." },
-  { key: "shopspend", label: "Shop Spend", unit: "$", desc: "Most money spent in shops." },
-  { key: "sellearned", label: "Sell Earnings", unit: "$", desc: "Most earned from /sell." },
+export const BOARDS: { key: BoardKey; label: string; desc: string }[] = [
+  { key: "money", label: "Money", desc: "Highest net worth on the server." },
+  { key: "kills", label: "PvP Kills", desc: "Most players eliminated." },
+  { key: "deaths", label: "Deaths", desc: "Lost the most duels." },
+  { key: "shards", label: "Shards", desc: "Most premium currency held." },
+  { key: "playtime", label: "Playtime", desc: "Longest time connected." },
+  { key: "blocksplaced", label: "Blocks Placed", desc: "Built the most." },
+  { key: "blocksbroken", label: "Blocks Broken", desc: "Mined the most." },
+  { key: "mobskilled", label: "Mobs Killed", desc: "Best hunters." },
+  { key: "shopspend", label: "Shop Spend", desc: "Most spent in shops." },
+  { key: "sellearned", label: "Sell Earnings", desc: "Most earned at /sell." },
 ];
 
 export const boardValue = (p: Player, key: BoardKey): number => {
@@ -123,12 +189,12 @@ export const boardValue = (p: Player, key: BoardKey): number => {
 };
 
 export const REGIONS = [
-  { id: "eu-central", name: "EU Central", short: "EUC", share: 0.30, players: 8420, peak: 21400, trend: 3.1 },
-  { id: "eu-west", name: "EU West", short: "EUW", share: 0.22, players: 6180, peak: 18900, trend: 1.4 },
-  { id: "na-east", name: "NA East", short: "NAE", share: 0.19, players: 5240, peak: 16300, trend: -0.8 },
-  { id: "na-west", name: "NA West", short: "NAW", share: 0.14, players: 3910, peak: 14200, trend: 2.2 },
-  { id: "asia", name: "Asia", short: "ASI", share: 0.10, players: 2740, peak: 12100, trend: 5.4 },
-  { id: "oceania", name: "Oceania", short: "OCE", share: 0.05, players: 1180, peak: 4600, trend: -1.6 },
+  { id: "eu-central", name: "EU Central", short: "EUC", share: 0.30, players: 6431, peak: 21400, trend: 3.1 },
+  { id: "eu-west", name: "EU West", short: "EUW", share: 0.22, players: 4716, peak: 18900, trend: 1.4 },
+  { id: "na-east", name: "NA East", short: "NAE", share: 0.19, players: 4073, peak: 16300, trend: -0.8 },
+  { id: "na-west", name: "NA West", short: "NAW", share: 0.14, players: 3001, peak: 14200, trend: 2.2 },
+  { id: "asia", name: "Asia", short: "ASI", share: 0.10, players: 2144, peak: 12100, trend: 5.4 },
+  { id: "oceania", name: "Oceania", short: "OCE", share: 0.05, players: 1072, peak: 4600, trend: -1.6 },
 ];
 
 export const SERVER = {

@@ -32,7 +32,12 @@ export default async function BoardPage({ params }: { params: Promise<{ board: s
     .sort((x, y) => boardValue(y, b.key as BoardKey) - boardValue(x, b.key as BoardKey))
     .map((p, i) => ({ p, rank: i + 1, value: boardValue(p, b.key as BoardKey) }));
 
-  const fmt = (v: number) => (b.key === "playtime" ? `${v.toLocaleString()} days` : b.unit === "$" ? formatMoney(v) : formatNum(v));
+  const fmt = (v: number) =>
+    b.key === "playtime"
+      ? `${v.toLocaleString()} days`
+      : b.key === "money" || b.key === "shopspend" || b.key === "sellearned"
+        ? formatMoney(v)
+        : formatNum(v);
 
   return (
     <>
