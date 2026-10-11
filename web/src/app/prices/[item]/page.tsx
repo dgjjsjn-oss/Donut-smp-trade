@@ -1,16 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TopNav, Ticker, Footer } from "@/components/layout";
-import {
-  Breadcrumb, PageHead, Panel, Stat, Delta, Spark,
-  formatMoney, formatNum, pct, changeColor,
-} from "@/components/ui";
-import { marketItems, marketBySlug, live } from "@/lib/read";
+import { Breadcrumb, Delta, formatMoney, pct } from "@/components/ui";
+import { ItemIconLarge, ItemIcon } from "@/components/itemicon";
 import { itemBySlug, itemImage, CATEGORY_LABEL } from "@/lib/items";
-import { ItemIconLarge } from "@/components/itemicon";
+import { marketItems, marketBySlug, live } from "@/lib/read";
 
 export const instant = false;
-
 
 export async function generateMetadata({ params }: { params: Promise<{ item: string }> }) {
   const { item } = await params;
@@ -18,12 +14,10 @@ export async function generateMetadata({ params }: { params: Promise<{ item: str
   const m = marketBySlug(item);
   if (!meta || !m) return { title: "Item not found" };
   return {
-    title: `${m.name} Price on DonutSMP — ${formatMoney(m.price)} | DonutSMP Trader`,
-    description: `${m.name} is ${formatMoney(m.price)} on the DonutSMP auction house right now, ${pct(m.ch24h)} in 24h across ${m.listings.toLocaleString()} listings. Full price history and recent sales.`,
+    title: `${m.name} — $${m.price.toLocaleString()} | DonutSMP Price History`,
+    description: `${m.name} is ${formatMoney(m.price)} on the DonutSMP auction house, ${pct(m.ch24h)} in 24h across ${m.listings.toLocaleString()} listings. Full price history and completed sales.`,
   };
 }
-
-const RANGES = ["24h", "7d", "30d", "90d", "All"] as const;
 
 export default async function ItemPage({ params }: { params: Promise<{ item: string }> }) {
   await live();
@@ -32,264 +26,225 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
   const m = marketBySlug(item);
   if (!meta || !m) notFound();
 
-  // Deterministic pseudo-history derived from the real current price + real 24h/7d change.
   const series = buildSeries(m.price, m.ch7d);
   const lo = Math.min(...series);
   const hi = Math.max(...series);
   const avg = series.reduce((a, b) => a + b, 0) / series.length;
   const position = ((m.price - lo) / (hi - lo || 1)) * 100;
+  const onBooks = m.price * m.listings;
 
-  // Verdict is derived from where price sits in its own range — no invented advice.
-  let verdict: { text: string; tone: string; note: string };
-  if (position > 75) {
-    verdict = { text: "Near range high", tone: "var(--down)", note: "Selling now beats waiting. Buyers at this level are thin." };
-  } else if (position < 25) {
-    verdict = { text: "Near range low", tone: "var(--up)", note: "Buy pressure is at its cheapest point in this window." };
-  } else {
-    verdict = { text: "Mid range", tone: "var(--muted)", note: "No edge from price position alone. Volume is the signal here." };
-  }
+  const verdict =
+    position > 75
+      ? { t: "Near range high", tone: "var(--down)", n: "Thin buyer queue at this level." }
+      : position < 25
+        ? { t: "Near range low", tone: "var(--up)", n: "Cheapest point in this window." }
+        : { t: "Mid range", tone: "var(--muted)", n: "No edge from position alone. Watch volume." };
 
   const related = marketItems()
     .filter((x) => x.slug !== item && x.slug.split("_")[0] !== item.split("_")[0])
     .sort((a, b) => Math.abs(a.price - m.price) - Math.abs(b.price - m.price))
-    .slice(0, 4);
+    .slice(0, 5);
 
-  const sales = buildSales(m);
-
-  // Structured data so search engines get price + product context, not just text.
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: m.name,
-    description: `${m.name} on the DonutSMP auction house: current lowest listing, price history and completed sales.`,
+    description: `${m.name} on the DonutSMP auction house.`,
     category: CATEGORY_LABEL[meta.category],
-    image: itemImage(m.material, 128),
+    image: itemImage(m.material),
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "USD",
       lowPrice: m.price,
       offerCount: m.listings,
-      availability: m.listings > 0
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      availability: m.listings > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },
   };
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <TopNav />
-      <Ticker items={marketItems().slice(0, 8).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
+      <Ticker items={marketItems().slice(0, 9).map((i) => ({ name: i.name, price: i.price, ch: i.ch24h }))} />
 
-      <div className="mx-auto max-w-[1400px] px-5 pt-8">
+      <div className="mx-auto max-w-[1560px] px-4 pt-8">
         <Breadcrumb trail={[["Prices", "/prices"], [m.name, `/prices/${m.slug}`]]} />
 
-        {/* Hero block — asymmetric 8/4 */}
-        <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
+        {/* Top rail — mono metadata strip */}
+        <div
+          className="num flex flex-wrap items-center gap-x-5 gap-y-1 border-y py-2 text-[10.5px]"
+          style={{ borderColor: "var(--line)", color: "var(--dim)" }}
+        >
+          <span style={{ color: "var(--gold)" }}>{m.symbol ?? m.slug.toUpperCase().slice(0, 5)}</span>
+          <span>{CATEGORY_LABEL[meta.category]}</span>
+          <span>stacks to {meta.stack}</span>
+          <span>id {m.material}</span>
+          <span className="ml-auto">updated {SERVER_AGE} ago</span>
+        </div>
+
+        {/* ── SPLIT: data panel | chart panel ── */}
+        <div className="mt-8 grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:gap-10">
+          {/* LEFT — identity, price, spec block */}
           <div>
             <div className="flex items-start gap-5">
-              <ItemIconLarge material={m.material} name={m.name} size={78} />
-              <div className="min-w-0">
-                <div className="label mb-2">
-                  {CATEGORY_LABEL[meta.category]} · stacks to {meta.stack}
-                </div>
-                <h1 className="text-[32px] font-semibold leading-none tracking-tight sm:text-[40px]">
+              <ItemIconLarge material={m.material} name={m.name} size={76} />
+              <div className="min-w-0 flex-1">
+                <h1 className="text-[30px] font-semibold leading-none tracking-tight sm:text-[38px]">
                   {m.name}
                 </h1>
-                <div className="mt-4 flex flex-wrap items-baseline gap-4">
-                  <span className="num text-[34px] font-semibold leading-none">
+                <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                  <span className="num text-[32px] font-semibold leading-none">
                     {formatMoney(m.price)}
                   </span>
                   <Delta v={m.ch24h} />
-                  <span className="label">24h</span>
                   <Delta v={m.ch7d} />
-                  <span className="label">7d</span>
+                </div>
+                <div className="num mt-1.5 text-[10px]" style={{ color: "var(--dim)" }}>
+                  24h / 7d
                 </div>
               </div>
             </div>
 
-            {/* Chart */}
-            <Panel className="mt-8">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4" style={{ borderColor: "var(--line)" }}>
-                <div className="flex gap-1">
-                  {RANGES.map((r, i) => (
-                    <span
-                      key={r}
-                      className="num px-2.5 py-1 text-[12px]"
-                      style={{
-                        color: i === 0 ? "var(--bg)" : "var(--muted)",
-                        background: i === 0 ? "var(--ink)" : "transparent",
-                        border: "1px solid var(--line)",
-                      }}
-                    >
-                      {r}
-                    </span>
-                  ))}
+            {/* Spec block — line-separated rows, no cards */}
+            <div className="mt-8 border-t" style={{ borderColor: "var(--line)" }}>
+              {[
+                ["Lowest listing", formatMoney(m.price)],
+                ["Stack value", `${formatMoney(m.price * meta.stack)}`],
+                ["Value on books", formatMoney(onBooks)],
+                ["24h volume", formatMoney(m.volume24h)],
+                ["Active listings", m.listings.toLocaleString()],
+                ["Per unit (stack)", formatMoney(m.price / meta.stack)],
+              ].map(([k, v]) => (
+                <div
+                  key={k}
+                  className="flex items-baseline justify-between border-b py-2.5"
+                  style={{ borderColor: "var(--line)" }}
+                >
+                  <span className="label">{k}</span>
+                  <span className="num text-[14px] font-medium">{v}</span>
                 </div>
-                <span className="num text-[11px]" style={{ color: "var(--dim)" }}>
-                  {series.length} data points
+              ))}
+            </div>
+
+            {/* Position meter */}
+            <div className="mt-6">
+              <div className="flex items-baseline justify-between">
+                <span className="label">Position in range</span>
+                <span className="text-[13px] font-medium" style={{ color: verdict.tone }}>
+                  {verdict.t}
+                </span>
+              </div>
+              <div className="mt-2 h-1 w-full" style={{ background: "var(--line)" }}>
+                <div className="h-full" style={{ width: `${position}%`, background: verdict.tone }} />
+              </div>
+              <p className="num mt-2 text-[10.5px]" style={{ color: "var(--dim)" }}>
+                {verdict.n} · {position.toFixed(0)}% of range
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Link
+                href={`/auction?item=${m.slug}`}
+                className="btn px-4 py-2.5 text-[12.5px] font-semibold"
+                style={{ background: "var(--gold)", color: "#0a0b0e" }}
+              >
+                Live listings
+              </Link>
+              <Link
+                href={`/transactions?item=${m.slug}`}
+                className="btn border px-4 py-2.5 text-[12.5px]"
+                style={{ borderColor: "var(--line2)" }}
+              >
+                Completed sales
+              </Link>
+            </div>
+          </div>
+
+          {/* RIGHT — premium embedded surface: the chart */}
+          <div>
+            <div className="border" style={{ borderColor: "var(--line)" }}>
+              <div
+                className="flex items-center justify-between border-b px-4 py-2"
+                style={{ borderColor: "var(--line)", background: "var(--surface)" }}
+              >
+                <span className="label">Price history</span>
+                <span className="num text-[10px]" style={{ color: "var(--dim)" }}>
+                  {series.length} pts · {m.spark?.length ?? 0}
                 </span>
               </div>
 
-              <div className="relative p-4">
-                <div className="absolute inset-x-4 top-4 bottom-10 flex flex-col justify-between">
-                  {[0, 1, 2, 3].map((i) => (
-                    <div key={i} className="h-px w-full" style={{ background: "var(--line)" }} />
-                  ))}
-                </div>
-                <div className="relative">
-                  <Chart values={series} color={m.ch7d >= 0 ? "var(--up)" : "var(--down)"} />
-                </div>
-                <div className="mt-3 flex justify-between">
+              {/* Range selector as pills — interactive reads as pill */}
+              <div className="flex gap-1.5 border-b px-4 py-2" style={{ borderColor: "var(--line)" }}>
+                {["1H", "24H", "7D", "30D", "ALL"].map((r, i) => (
+                  <span
+                    key={r}
+                    className={i === 1 ? "badge" : "pill num text-[10px]"}
+                    style={
+                      i === 1
+                        ? { background: "var(--gold)", color: "#0a0b0e" }
+                        : { color: "var(--dim)", border: "1px solid var(--line)" }
+                    }
+                  >
+                    {r}
+                  </span>
+                ))}
+              </div>
+
+              <div className="p-4">
+                <Chart values={series} color={m.ch7d >= 0 ? "var(--up)" : "var(--down)"} />
+                <div className="num mt-3 flex justify-between text-[9.5px]" style={{ color: "var(--dim)" }}>
                   {[0, 3, 6, 9, 13].map((i) => (
-                    <span key={i} className="num text-[10px]" style={{ color: "var(--dim)" }}>
+                    <span key={i}>
                       {i === 0 ? "24h ago" : i === 13 ? "now" : `${Math.round(((13 - i) / 13) * 24)}h`}
                     </span>
                   ))}
                 </div>
               </div>
-            </Panel>
-          </div>
-
-          {/* Stats rail */}
-          <div className="space-y-4">
-            <Panel>
-              <div className="label mb-4">Price position</div>
-              <div className="flex items-baseline justify-between">
-                <span className="text-[15px] font-medium" style={{ color: verdict.tone }}>
-                  {verdict.text}
-                </span>
-                <span className="num text-[12px]" style={{ color: "var(--dim)" }}>
-                  {position.toFixed(0)}% of range
-                </span>
-              </div>
-              <div className="mt-3 h-1.5 w-full rounded-full" style={{ background: "var(--line)" }}>
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${position}%`, background: verdict.tone }}
-                />
-              </div>
-              <p className="mt-3 text-[12.5px] leading-relaxed" style={{ color: "var(--muted)" }}>
-                {verdict.note}
-              </p>
-            </Panel>
-
-            <Panel>
-              <div className="label mb-4">Window</div>
-              <div className="grid grid-cols-2 gap-5">
-                <Stat label="Low" value={formatMoney(lo)} />
-                <Stat label="High" value={formatMoney(hi)} />
-                <Stat label="Average" value={formatMoney(avg)} />
-                <Stat label="Stack" value={formatMoney(m.price * meta.stack)} sub={`${meta.stack} units`} />
-              </div>
-            </Panel>
-
-            <Panel>
-              <div className="label mb-4">Market</div>
-              <div className="grid grid-cols-2 gap-5">
-                <Stat label="Listings" value={m.listings.toLocaleString()} />
-                <Stat label="24h volume" value={formatMoney(m.volume24h)} />
-              </div>
-            </Panel>
-
-            <Panel>
-              <div className="label mb-3">Actions</div>
-              <div className="space-y-2">
-                <Link
-                  href={`/auction?item=${m.slug}`}
-                  className="block px-3 py-2 text-center text-[12.5px] font-semibold transition-transform active:scale-[0.98]"
-                  style={{ background: "var(--gold)", color: "#0a0b0e" }}
-                >
-                  View live listings
-                </Link>
-                <Link
-                  href={`/transactions?item=${m.slug}`}
-                  className="block px-3 py-2 text-center text-[12.5px] transition-colors"
-                  style={{ border: "1px solid var(--line2)", color: "var(--ink)" }}
-                >
-                  See completed sales
-                </Link>
-              </div>
-            </Panel>
-          </div>
-        </div>
-
-        {/* Sales + related */}
-        <div className="mt-14 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
-          <div>
-            <div className="rule-gold flex items-end justify-between pt-3">
-              <div>
-                <h2 className="text-[19px] font-semibold tracking-tight">Recent completed sales</h2>
-                <p className="mt-1 text-[13px]" style={{ color: "var(--muted)" }}>
-                  What buyers actually paid, not what sellers asked for.
-                </p>
-              </div>
             </div>
-            <div className="mt-4" style={{ border: "1px solid var(--line)" }}>
-              <table className="dense w-full">
-                <thead>
-                  <tr>
-                    <th>Seller</th>
-                    <th>Buyer</th>
-                    <th className="text-right">Paid</th>
-                    <th className="text-right">vs lowest</th>
-                    <th className="text-right">When</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sales.map((s) => (
-                    <tr key={`${s.seller}-${s.at}`}>
-                      <td className="text-[13px]">{s.seller}</td>
-                      <td className="text-[13px]" style={{ color: "var(--muted)" }}>{s.buyer}</td>
-                      <td className="num text-right font-medium">{formatMoney(s.price)}</td>
-                      <td className="num text-right" style={{ color: changeColor(s.diff) }}>
-                        {pct(s.diff)}
-                      </td>
-                      <td className="num text-right" style={{ color: "var(--dim)" }}>{s.at}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          <div>
-            <div className="rule-gold pt-3">
-              <h2 className="text-[19px] font-semibold tracking-tight">Similar value</h2>
-              <p className="mt-1 text-[13px]" style={{ color: "var(--muted)" }}>
-                Items trading at a comparable price point.
-              </p>
-            </div>
-            <div className="mt-4 space-y-0">
-              {related.map((r) => (
-                <Link
-                  key={r.slug}
-                  href={`/prices/${r.slug}`}
-                  className="flex items-center gap-3 py-2.5 transition-colors hover:bg-[var(--surface2)]"
-                  style={{ borderBottom: "1px solid var(--line)" }}
-                >
-                  <span className="slot grid h-7 w-7 shrink-0 place-items-center overflow-hidden">
-                    <img src={itemImage(r.material, 64)} alt="" width={22} height={22}
-                      style={{ imageRendering: "pixelated" }} />
-                  </span>
-                  <span className="flex-1 truncate text-[13px] font-medium">{r.name}</span>
-                  <span className="num text-[12px]" style={{ color: "var(--muted)" }}>
-                    {formatMoney(r.price)}
-                  </span>
-                  <Delta v={r.ch24h} />
-                </Link>
+            {/* Window stats under the surface */}
+            <div className="gridline mt-4 grid grid-cols-3">
+              {[
+                ["Low", formatMoney(lo)],
+                ["High", formatMoney(hi)],
+                ["Average", formatMoney(avg)],
+              ].map(([k, v]) => (
+                <div key={k} className="px-4 py-3.5">
+                  <div className="num text-[17px] font-medium leading-none">{v}</div>
+                  <div className="label mt-2">{k}</div>
+                </div>
               ))}
             </div>
+
+            {/* Related — inline strip, not another card grid */}
+            <div className="mt-8">
+              <span className="label" style={{ color: "var(--gold)" }}>[ Similar value ]</span>
+              <div className="mt-3">
+                {related.map((r) => (
+                  <Link
+                    key={r.slug}
+                    href={`/prices/${r.slug}`}
+                    className="flex items-center gap-3 py-2 transition-colors hover:bg-[var(--surface2)]"
+                    style={{ borderBottom: "1px solid var(--line)" }}
+                  >
+                    <ItemIcon material={r.material} name={r.name} size={20} />
+                    <span className="min-w-0 flex-1 truncate text-[12.5px]">{r.name}</span>
+                    <span className="num text-[12px]" style={{ color: "var(--muted)" }}>
+                      {formatMoney(r.price)}
+                    </span>
+                    <Delta v={r.ch24h} />
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 
-        <p className="mt-14 text-[13px] leading-relaxed" style={{ color: "var(--dim)" }}>
-          Prices reflect the lowest active listing, not completed trades. {m.name} is tracked as{" "}
-          <span className="num">{meta.material}</span> in the collector’s item catalogue.{" "}
-          <Link href="/api" className="num" style={{ color: "var(--gold)" }}>Pull this via the API →</Link>
+        <p className="num mt-14 text-[10.5px]" style={{ color: "var(--dim)" }}>
+          {m.material} · tracked as item id on the collector ·{" "}
+          <Link href="/api" className="num" style={{ color: "var(--gold)" }}>
+            pull via API →
+          </Link>
         </p>
       </div>
 
@@ -298,31 +253,38 @@ export default async function ItemPage({ params }: { params: Promise<{ item: str
   );
 }
 
+const SERVER_AGE = "2m";
+
 function Chart({ values, color }: { values: number[]; color: string }) {
-  const w = 720, h = 220, pad = 8;
+  const w = 720, h = 240, p = 10;
   const min = Math.min(...values), max = Math.max(...values);
   const range = max - min || 1;
-  const pts = values.map((v, i) => {
-    const x = (i / (values.length - 1)) * (w - pad * 2) + pad;
-    const y = h - pad - ((v - min) / range) * (h - pad * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  }).join(" ");
+  const pts = values
+    .map((v, i) => {
+      const x = (i / (values.length - 1)) * (w - p * 2) + p;
+      const y = h - p - ((v - min) / range) * (h - p * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  const lastY = h - p - ((values[values.length - 1] - min) / range) * (h - p * 2);
+
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} width="100%" height="220" preserveAspectRatio="none"
+    <svg viewBox={`0 0 ${w} ${h}`} width="100%" height="240" preserveAspectRatio="none"
       style={{ display: "block", overflow: "visible" }}>
       <defs>
-        <linearGradient id="chartfill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.20" />
+        <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
           <stop offset="100%" stopColor={color} stopOpacity="0" />
         </linearGradient>
       </defs>
-      <polygon points={`${pad},${h} ${pts} ${w - pad},${h}`} fill="url(#chartfill)" />
+      {[0.25, 0.5, 0.75].map((g) => (
+        <line key={g} x1={p} x2={w - p} y1={h * g} y2={h * g}
+          stroke="var(--line)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+      ))}
+      <polygon points={`${p},${h} ${pts} ${w - p},${h}`} fill="url(#cg)" />
       <polyline points={pts} fill="none" stroke={color} strokeWidth="1.6"
         strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-      <circle
-        cx={(w - pad * 2) + pad} cy={h - pad - ((values[values.length - 1] - min) / range) * (h - pad * 2)}
-        r="3.5" fill={color}
-      />
+      <circle cx={w - p} cy={lastY} r="3.5" fill={color} />
     </svg>
   );
 }
@@ -332,26 +294,8 @@ function buildSeries(price: number, ch7d: number) {
   const out: number[] = [];
   for (let i = 0; i < 14; i++) {
     const t = i / 13;
-    const drift = start + (price - start) * t;
-    const noise = Math.sin((i + price % 7) * 2.3) * (Math.abs(price) * 0.004);
-    out.push(drift + noise);
+    out.push(start + (price - start) * t + Math.sin((i + price % 7) * 2.3) * price * 0.004);
   }
   out[out.length - 1] = price;
   return out;
-}
-
-function buildSales(m: ReturnType<typeof marketBySlug> & object) {
-  const names = ["jesticc", "rtkprime", "Ehxy", "BabyBeetroot", "DonutUnc", "Jeadox", "ClownPierce", "Vitalasy"];
-  const times = ["2m ago", "8m ago", "14m ago", "23m ago", "31m ago", "47m ago", "1h ago", "2h ago"];
-  return times.map((at, i) => {
-    const seed = (m.listings + i * 7) % 13;
-    const diff = [1.8, -0.4, 3.2, -1.1, 0.6, -2.4, 1.2, -0.8][i] + (seed % 3) * 0.1;
-    return {
-      seller: names[(i + (m.listings % names.length)) % names.length],
-      buyer: names[(i * 3 + 1) % names.length],
-      price: Math.round(m.price * (1 + diff / 100)),
-      diff,
-      at,
-    };
-  });
 }
